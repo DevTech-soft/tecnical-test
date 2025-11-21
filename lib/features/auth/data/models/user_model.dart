@@ -9,6 +9,8 @@ class UserModel extends User {
     super.photoUrl,
     required super.isEmailVerified,
     super.createdAt,
+    super.firstName,
+    super.lastName,
   });
 
   /// Convert from Firebase User to UserModel
@@ -20,10 +22,13 @@ class UserModel extends User {
       photoUrl: firebaseUser.photoURL,
       isEmailVerified: firebaseUser.emailVerified,
       createdAt: firebaseUser.metadata.creationTime,
+      // firstName y lastName se obtendrán de Firestore
+      firstName: null,
+      lastName: null,
     );
   }
 
-  /// Convert from JSON
+  /// Convert from JSON (Firestore)
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['id'] as String,
@@ -34,10 +39,12 @@ class UserModel extends User {
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
           : null,
+      firstName: json['firstName'] as String?,
+      lastName: json['lastName'] as String?,
     );
   }
 
-  /// Convert to JSON
+  /// Convert to JSON (Firestore)
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -46,6 +53,8 @@ class UserModel extends User {
       'photoUrl': photoUrl,
       'isEmailVerified': isEmailVerified,
       'createdAt': createdAt?.toIso8601String(),
+      'firstName': firstName,
+      'lastName': lastName,
     };
   }
 
@@ -57,6 +66,31 @@ class UserModel extends User {
       photoUrl: photoUrl,
       isEmailVerified: isEmailVerified,
       createdAt: createdAt,
+      firstName: firstName,
+      lastName: lastName,
+    );
+  }
+
+  /// CopyWith para actualizar campos
+  UserModel copyWith({
+    String? id,
+    String? email,
+    String? displayName,
+    String? photoUrl,
+    bool? isEmailVerified,
+    DateTime? createdAt,
+    String? firstName,
+    String? lastName,
+  }) {
+    return UserModel(
+      id: id ?? this.id,
+      email: email ?? this.email,
+      displayName: displayName ?? this.displayName,
+      photoUrl: photoUrl ?? this.photoUrl,
+      isEmailVerified: isEmailVerified ?? this.isEmailVerified,
+      createdAt: createdAt ?? this.createdAt,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
     );
   }
 }

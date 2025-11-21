@@ -7,6 +7,8 @@ class User extends Equatable {
   final String? photoUrl;
   final bool isEmailVerified;
   final DateTime? createdAt;
+  final String? firstName;
+  final String? lastName;
 
   const User({
     required this.id,
@@ -15,7 +17,17 @@ class User extends Equatable {
     this.photoUrl,
     required this.isEmailVerified,
     this.createdAt,
+    this.firstName,
+    this.lastName,
   });
+
+  /// Helper para obtener el nombre completo
+  String get fullName {
+    if (firstName != null && lastName != null) {
+      return '$firstName $lastName';
+    }
+    return displayName ?? email.split('@').first;
+  }
 
   @override
   List<Object?> get props => [
@@ -25,5 +37,7 @@ class User extends Equatable {
         photoUrl,
         isEmailVerified,
         createdAt,
+        firstName,
+        lastName,
       ];
 }

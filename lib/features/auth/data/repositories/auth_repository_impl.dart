@@ -50,15 +50,28 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<User> signUpWithEmail({
     required String email,
     required String password,
+    required String firstName,
+    required String lastName,
   }) async {
     final firebaseUser = await remoteDataSource.signUpWithEmail(
       email: email,
       password: password,
     );
 
-    final userModel = UserModel.fromFirebaseUser(firebaseUser);
+    // Actualizar displayName en Firebase Auth
+    final displayName = '$firstName $lastName';
+    await firebaseUser.updateDisplayName(displayName);
+    await firebaseUser.reload();
+    final updatedFirebaseUser = remoteDataSource.getCurrentUser()!;
 
-    // Guardar usuario nuevo en Firestore
+    // Crear UserModel con los datos adicionales
+    final userModel = UserModel.fromFirebaseUser(updatedFirebaseUser).copyWith(
+      firstName: firstName,
+      lastName: lastName,
+      displayName: displayName,
+    );
+
+    // Guardar usuario nuevo en Firestore con firstName y lastName
     await userRemoteDataSource.saveUser(userModel);
 
     return userModel.toEntity();

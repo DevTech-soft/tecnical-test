@@ -31,6 +31,8 @@ class _LoginPageContentState extends State<_LoginPageContent> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
   bool _isLogin = true;
   bool _obscurePassword = true;
 
@@ -38,6 +40,8 @@ class _LoginPageContentState extends State<_LoginPageContent> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     super.dispose();
   }
 
@@ -95,6 +99,56 @@ class _LoginPageContentState extends State<_LoginPageContent> {
                     key: _formKey,
                     child: Column(
                       children: [
+                        // Nombre (solo en registro)
+                        if (!_isLogin) ...[
+                          TextFormField(
+                            controller: _firstNameController,
+                            keyboardType: TextInputType.name,
+                            textCapitalization: TextCapitalization.words,
+                            decoration: InputDecoration(
+                              labelText: 'Nombre',
+                              prefixIcon: const Icon(Icons.person_outlined),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12.r),
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'El nombre es requerido';
+                              }
+                              if (value.trim().length < 2) {
+                                return 'El nombre debe tener al menos 2 caracteres';
+                              }
+                              return null;
+                            },
+                          ),
+                          SizedBox(height: AppSpacing.md.h),
+
+                          // Apellidos (solo en registro)
+                          TextFormField(
+                            controller: _lastNameController,
+                            keyboardType: TextInputType.name,
+                            textCapitalization: TextCapitalization.words,
+                            decoration: InputDecoration(
+                              labelText: 'Apellidos',
+                              prefixIcon: const Icon(Icons.person_outline),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12.r),
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Los apellidos son requeridos';
+                              }
+                              if (value.trim().length < 2) {
+                                return 'Los apellidos deben tener al menos 2 caracteres';
+                              }
+                              return null;
+                            },
+                          ),
+                          SizedBox(height: AppSpacing.md.h),
+                        ],
+
                         // Email
                         TextFormField(
                           controller: _emailController,
@@ -281,10 +335,15 @@ class _LoginPageContentState extends State<_LoginPageContent> {
               ),
             );
       } else {
+        final firstName = _firstNameController.text.trim();
+        final lastName = _lastNameController.text.trim();
+
         context.read<AuthBloc>().add(
               SignUpWithEmailRequested(
                 email: email,
                 password: password,
+                firstName: firstName,
+                lastName: lastName,
               ),
             );
       }

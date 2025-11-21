@@ -12,6 +12,8 @@ class SignUpWithEmail extends UseCase<User, SignUpWithEmailParams> {
     return await repository.signUpWithEmail(
       email: params.email,
       password: params.password,
+      firstName: params.firstName,
+      lastName: params.lastName,
     );
   }
 }
@@ -19,9 +21,13 @@ class SignUpWithEmail extends UseCase<User, SignUpWithEmailParams> {
 class SignUpWithEmailParams {
   final String email;
   final String password;
+  final String firstName;
+  final String lastName;
 
   SignUpWithEmailParams({
     required this.email,
     required this.password,
+    required this.firstName,
+    required this.lastName,
   });
 }

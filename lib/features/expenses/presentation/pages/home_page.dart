@@ -57,10 +57,11 @@ class _HomePageState extends State<HomePage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => BlocProvider.value(
-          value: _expensesBloc,
-          child: const AddExpensePage(),
-        ),
+        builder:
+            (_) => BlocProvider.value(
+              value: _expensesBloc,
+              child: const AddExpensePage(),
+            ),
       ),
     ).then((_) {
       // Reload expenses after adding
@@ -72,10 +73,11 @@ class _HomePageState extends State<HomePage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => BlocProvider.value(
-          value: _expensesBloc,
-          child: EditExpensePage(expense: expense),
-        ),
+        builder:
+            (_) => BlocProvider.value(
+              value: _expensesBloc,
+              child: EditExpensePage(expense: expense),
+            ),
       ),
     ).then((_) {
       // Reload expenses after editing
@@ -132,116 +134,119 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: _expensesBloc,
-      child: Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: ResponsiveBuilder(
-          builder: (context, deviceType) {
-            return CustomScrollView(
-              controller: _scrollController,
-              slivers: [
-                _buildAppBar(context),
-                SliverToBoxAdapter(
-                  child: BlocBuilder<ExpensesBloc, ExpensesState>(
-                    builder: (context, state) {
-                      if (state is ExpensesLoading) {
-                        return _buildLoadingState();
-                      }
-                      if (state is ExpensesLoaded) {
-                        final allExpenses = state.expenses;
-                        final filteredExpenses = _filterExpensesByDate(
-                          allExpenses,
-                        );
+      child: SafeArea(
+        child: Scaffold(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          body: ResponsiveBuilder(
+            builder: (context, deviceType) {
+              return CustomScrollView(
+                controller: _scrollController,
+                slivers: [
+                  _buildAppBar(context),
+                  SliverToBoxAdapter(
+                    child: BlocBuilder<ExpensesBloc, ExpensesState>(
+                      builder: (context, state) {
+                        if (state is ExpensesLoading) {
+                          return _buildLoadingState();
+                        }
+                        if (state is ExpensesLoaded) {
+                          final allExpenses = state.expenses;
+                          final filteredExpenses = _filterExpensesByDate(
+                            allExpenses,
+                          );
 
-                        if (filteredExpenses.isEmpty) {
-                          return SizedBox(
-                            height: MediaQuery.of(context).size.height - 200,
-                            child: EmptyState(
-                              title: 'Sin gastos',
-                              message:
-                                  'No hay gastos registrados para esta fecha.\nSelecciona otra fecha o agrega un nuevo gasto.',
-                              icon: Icons.calendar_month,
-                              actionLabel: 'Agregar Gasto',
-                              onActionPressed: _navigateToAddExpense,
-                            ),
+                          if (filteredExpenses.isEmpty) {
+                            return SizedBox(
+                              height: MediaQuery.of(context).size.height - 200,
+                              child: EmptyState(
+                                title: 'Sin gastos',
+                                message:
+                                    'No hay gastos registrados para esta fecha.\nSelecciona otra fecha o agrega un nuevo gasto.',
+                                icon: Icons.calendar_month,
+                                actionLabel: 'Agregar Gasto',
+                                onActionPressed: _navigateToAddExpense,
+                              ),
+                            );
+                          }
+                          return Column(
+                            children: [
+                              ExpenseSummaryCard(expenses: filteredExpenses),
+                              AppSpacing.verticalSpaceSM,
+                              StatsOverview(expenses: filteredExpenses),
+                              AppSpacing.verticalSpaceMD,
+                              Padding(
+                                padding: AppSpacing.paddingHorizontalMD,
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Transacciones',
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    Text(
+                                      '${filteredExpenses.length} ${filteredExpenses.length == 1 ? 'gasto' : 'gastos'}',
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.labelMedium?.copyWith(
+                                        color: AppColors.textSecondaryLight,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              AppSpacing.verticalSpaceSM,
+                            ],
                           );
                         }
-                        return Column(
-                          children: [
-                            ExpenseSummaryCard(expenses: filteredExpenses),
-                            AppSpacing.verticalSpaceSM,
-                            StatsOverview(expenses: filteredExpenses),
-                            AppSpacing.verticalSpaceMD,
-                            Padding(
-                              padding: AppSpacing.paddingHorizontalMD,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Transacciones',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium
-                                        ?.copyWith(fontWeight: FontWeight.w600),
-                                  ),
-                                  Text(
-                                    '${filteredExpenses.length} ${filteredExpenses.length == 1 ? 'gasto' : 'gastos'}',
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.labelMedium?.copyWith(
-                                      color: AppColors.textSecondaryLight,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            AppSpacing.verticalSpaceSM,
-                          ],
+                        if (state is ExpensesError) {
+                          return _buildErrorState(state.userMessage);
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                  ),
+                  BlocBuilder<ExpensesBloc, ExpensesState>(
+                    builder: (context, state) {
+                      if (state is ExpensesLoaded) {
+                        final filteredExpenses = _filterExpensesByDate(
+                          state.expenses,
                         );
+
+                        if (filteredExpenses.isNotEmpty) {
+                          return SliverList(
+                            delegate: SliverChildBuilderDelegate((
+                              context,
+                              index,
+                            ) {
+                              final expense = filteredExpenses[index];
+                              return ExpenseCard(
+                                expense: expense,
+                                onTap: () => _navigateToEditExpense(expense),
+                                onDelete: () {
+                                  _showDeleteConfirmation(context, expense.id);
+                                },
+                              );
+                            }, childCount: filteredExpenses.length),
+                          );
+                        }
                       }
-                      if (state is ExpensesError) {
-                        return _buildErrorState(state.userMessage);
-                      }
-                      return const SizedBox.shrink();
+                      return const SliverToBoxAdapter(child: SizedBox.shrink());
                     },
                   ),
-                ),
-                BlocBuilder<ExpensesBloc, ExpensesState>(
-                  builder: (context, state) {
-                    if (state is ExpensesLoaded) {
-                      final filteredExpenses = _filterExpensesByDate(
-                        state.expenses,
-                      );
-
-                      if (filteredExpenses.isNotEmpty) {
-                        return SliverList(
-                          delegate: SliverChildBuilderDelegate((
-                            context,
-                            index,
-                          ) {
-                            final expense = filteredExpenses[index];
-                            return ExpenseCard(
-                              expense: expense,
-                              onTap: () => _navigateToEditExpense(expense),
-                              onDelete: () {
-                                _showDeleteConfirmation(context, expense.id);
-                              },
-                            );
-                          }, childCount: filteredExpenses.length),
-                        );
-                      }
-                    }
-                    return const SliverToBoxAdapter(child: SizedBox.shrink());
-                  },
-                ),
-                const SliverToBoxAdapter(
-                  child: SizedBox(height: AppSpacing.xxxl),
-                ),
-              ],
-            );
-          },
+                  const SliverToBoxAdapter(
+                    child: SizedBox(height: AppSpacing.xxxl),
+                  ),
+                ],
+              );
+            },
+          ),
+          floatingActionButton: _buildFAB(context),
         ),
-        floatingActionButton: _buildFAB(context),
       ),
     );
   }
@@ -250,98 +255,140 @@ class _HomePageState extends State<HomePage> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return SliverAppBar(
-      expandedHeight: 80,
+      expandedHeight: 100,
       floating: true,
       pinned: true,
       elevation: _isScrolled ? 2 : 0,
       backgroundColor:
-          _isScrolled
-              ? Theme.of(context).scaffoldBackgroundColor
-              : Colors.transparent,
+          isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
       actions: [
         PopupMenuButton<String>(
           icon: Icon(
             Icons.more_vert,
-            color: _isScrolled
-                ? (isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight)
-                : Colors.white,
+            color:
+                _isScrolled
+                    ? (isDark
+                        ? AppColors.textPrimaryDark
+                        : AppColors.textPrimaryLight)
+                    : Colors.white,
           ),
           onSelected: (value) {
             if (value == 'export') {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => BlocProvider.value(
-                    value: _expensesBloc,
-                    child: const ExportPage(),
-                  ),
+                  builder:
+                      (_) => BlocProvider.value(
+                        value: _expensesBloc,
+                        child: const ExportPage(),
+                      ),
                 ),
               );
             } else if (value == 'logout') {
               // Mostrar diálogo de confirmación
               showDialog(
                 context: context,
-                builder: (dialogContext) => AlertDialog(
-                  title: const Text('Cerrar sesión'),
-                  content: const Text('¿Estás seguro de que quieres cerrar sesión?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(dialogContext),
-                      child: const Text('Cancelar'),
+                builder:
+                    (dialogContext) => AlertDialog(
+                      title: const Text('Cerrar sesión'),
+                      content: const Text(
+                        '¿Estás seguro de que quieres cerrar sesión?',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(dialogContext),
+                          child: const Text('Cancelar'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(dialogContext);
+                            context.read<AuthBloc>().add(
+                              const SignOutRequested(),
+                            );
+                          },
+                          child: const Text('Cerrar sesión'),
+                        ),
+                      ],
                     ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(dialogContext);
-                        context.read<AuthBloc>().add(const SignOutRequested());
-                      },
-                      child: const Text('Cerrar sesión'),
-                    ),
-                  ],
-                ),
               );
             }
           },
-          itemBuilder: (context) => [
-            const PopupMenuItem(
-              value: 'export',
-              child: Row(
-                children: [
-                  Icon(Icons.file_download, size: 20),
-                  SizedBox(width: 12),
-                  Text('Exportar Datos'),
-                ],
-              ),
-            ),
-            const PopupMenuItem(
-              value: 'settings',
-              child: Row(
-                children: [
-                  Icon(Icons.settings, size: 20),
-                  SizedBox(width: 12),
-                  Text('Configuración'),
-                ],
-              ),
-            ),
-            const PopupMenuItem(
-              value: 'logout',
-              child: Row(
-                children: [
-                  Icon(Icons.logout, size: 20),
-                  SizedBox(width: 12),
-                  Text('Cerrar sesión'),
-                ],
-              ),
-            ),
-          ],
+          itemBuilder:
+              (context) => [
+                const PopupMenuItem(
+                  value: 'export',
+                  child: Row(
+                    children: [
+                      Icon(Icons.file_download, size: 20),
+                      SizedBox(width: 12),
+                      Text('Exportar Datos'),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'settings',
+                  child: Row(
+                    children: [
+                      Icon(Icons.settings, size: 20),
+                      SizedBox(width: 12),
+                      Text('Configuración'),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'logout',
+                  child: Row(
+                    children: [
+                      Icon(Icons.logout, size: 20),
+                      SizedBox(width: 12),
+                      Text('Cerrar sesión'),
+                    ],
+                  ),
+                ),
+              ],
         ),
       ],
       flexibleSpace: FlexibleSpaceBar(
-        centerTitle: true,
-        titlePadding: const EdgeInsets.only(bottom: AppSpacing.md),
-        title: DateFilterSelector(
-          selectedDate: _selectedDate,
-          onTap: _selectDate,
-          isScrolled: _isScrolled,
+        centerTitle: false,
+        titlePadding: const EdgeInsets.only(
+          left: AppSpacing.lg,
+          right: AppSpacing.lg,
+        ),
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Greeting con nombre del usuario
+            BlocBuilder<AuthBloc, AuthState>(
+              builder: (context, state) {
+                if (state is Authenticated) {
+                  final greeting = _getGreeting();
+                  final userName = state.user.fullName.split(' ').first;
+                  return Text(
+                    '$greeting, $userName...',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color:
+                          _isScrolled
+                              ? (isDark
+                                  ? AppColors.textPrimaryDark
+                                  : AppColors.textPrimaryLight)
+                              : Colors.white,
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+            const SizedBox(height: 4),
+            // Date filter
+            DateFilterSelector(
+              selectedDate: _selectedDate,
+              onTap: _selectDate,
+              isScrolled: _isScrolled,
+            ),
+          ],
         ),
         background: Container(
           decoration: BoxDecoration(
@@ -350,6 +397,17 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) {
+      return 'Buenos días';
+    } else if (hour < 18) {
+      return 'Buenas tardes';
+    } else {
+      return 'Buenas noches';
+    }
   }
 
   Widget _buildFAB(BuildContext context) {
