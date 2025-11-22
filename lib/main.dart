@@ -9,6 +9,7 @@ import 'features/auth/presentation/pages/login_page.dart';
 import 'features/main_navigation/main_navigation_page.dart';
 import 'injection_container.dart' as di;
 import 'features/expenses/data/models/expense_model.dart';
+import 'features/expenses/data/models/recurring_expense_model.dart';
 import 'features/budget/data/models/budget_model.dart';
 import 'core/theme/app_theme.dart';
 
@@ -22,12 +23,14 @@ void main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(ExpenseModelAdapter());
   Hive.registerAdapter(BudgetModelAdapter());
+  Hive.registerAdapter(RecurringExpenseModelAdapter());
 
   final expenseBox = await Hive.openBox<ExpenseModel>('expensesBox');
   final budgetBox = await Hive.openBox<BudgetModel>('budgetsBox');
+  final recurringExpenseBox = await Hive.openBox<RecurringExpenseModel>('recurringExpensesBox');
 
   // Initialize dependency injection
-  await di.init(expenseBox, budgetBox);
+  await di.init(expenseBox, budgetBox, recurringExpenseBox);
 
   // Set system UI overlay style
   SystemChrome.setSystemUIOverlayStyle(

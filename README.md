@@ -29,13 +29,15 @@ Daily Expenses es una aplicación móvil construida con Flutter que permite a lo
 - ✅ Diseño Material 3
 - ✅ Arquitectura Clean Architecture
 - ✅ Gestión de estado con BLoC
+- ✅ **Búsqueda y filtros avanzados** (texto, categorías, fechas, montos, ordenamiento)
+- ✅ **Backend de gastos recurrentes** (lógica de negocio completa)
 
 ### En Desarrollo 🚧
 
 - 🚧 Testing completo
 - 🚧 Optimización de rendimiento
-- 🚧 Búsqueda y filtros avanzados
-- 🚧 Gastos recurrentes
+- 🚧 UI de gastos recurrentes
+- 🚧 Generación automática de gastos recurrentes
 
 ## 🏗️ Arquitectura
 
@@ -63,7 +65,7 @@ lib/
 
 # 🗺️ ROADMAP DE DESARROLLO
 
-## Estado General: 70% Completado
+## Estado General: 75% Completado
 
 ---
 
@@ -195,22 +197,61 @@ lib/
 
 ---
 
-## 🎨 FASE 4: MEJORAS DE UX/UI
+## 🎨 FASE 4: MEJORAS DE UX/UI (45% COMPLETADA) ⭐
 
-### 4.1 Búsqueda y Filtros Avanzados
-- [ ] Buscador de gastos por texto (notas, categoría)
-- [ ] Filtrar por categoría múltiple
-- [ ] Filtrar por rango de fechas personalizado
-- [ ] Filtrar por rango de montos (min-max)
-- [ ] Ordenar por: monto, fecha, categoría
-- [ ] Guardar filtros favoritos
-- [ ] Búsqueda con sugerencias
+### 4.1 Búsqueda y Filtros Avanzados ✅ COMPLETADA
+- [x] **Domain Layer**
+  - [x] Entidad `ExpenseFilter` con todos los criterios
+  - [x] Enum `ExpenseSortOption` (5 opciones)
+  - [x] Use case `SearchExpenses` con lógica de negocio
+- [x] **Data Layer**
+  - [x] Lógica de filtrado en use case (NO en repository - Clean Architecture)
+  - [x] Filtrado por texto (notas, categoría)
+  - [x] Filtrado por categorías múltiples
+  - [x] Filtrado por rango de fechas
+  - [x] Filtrado por rango de montos
+  - [x] Ordenamiento (monto asc/desc, fecha asc/desc, categoría)
+- [x] **Presentation Layer**
+  - [x] `FilterBloc` con eventos y estados
+  - [x] `SearchExpensesPage` con UI completa
+  - [x] Barra de búsqueda con debounce (500ms)
+  - [x] Chips de filtros activos (removibles)
+  - [x] Bottom sheet con todos los filtros
+  - [x] Date range picker integrado
+  - [x] Contador de resultados
+  - [x] PopupMenu de ordenamiento
+  - [x] Estados: loading, error, vacío
+  - [x] Fix: manejo correcto de widgets desmontados
+- [ ] Guardar filtros favoritos - pendiente
+- [ ] Búsqueda con sugerencias - pendiente
 
-### 4.2 Funcionalidades Avanzadas de Gastos
-- [ ] Gastos recurrentes (diario, semanal, mensual, anual)
-  - [ ] Crear plantilla de gasto recurrente
-  - [ ] Generación automática de gastos
-  - [ ] Editar/pausar/eliminar recurrencias
+### 4.2 Gastos Recurrentes (Backend Completo ✅, UI Pendiente)
+- [x] **Domain Layer**
+  - [x] Entidad `RecurringExpense` con lógica de negocio
+  - [x] Enum `FrequencyType` (8 frecuencias: diario, semanal, quincenal, mensual, bimestral, trimestral, semestral, anual)
+  - [x] Repository interface `RecurringExpenseRepository`
+  - [x] Use Cases:
+    - [x] `CreateRecurringExpense`
+    - [x] `GetAllRecurringExpenses`
+    - [x] `UpdateRecurringExpense`
+    - [x] `DeleteRecurringExpense`
+    - [x] `GenerateExpensesFromRecurring` (lógica de generación automática)
+- [x] **Data Layer**
+  - [x] `RecurringExpenseModel` con Hive adapter (typeId: 2)
+  - [x] `RecurringExpenseLocalDataSource` (Hive)
+  - [x] `RecurringExpenseRepositoryImpl` (repository "tonto")
+  - [x] Hive box configurado en main.dart
+  - [x] Dependency injection configurado
+- [ ] **Presentation Layer** - Pendiente
+  - [ ] `RecurringExpensesBloc`
+  - [ ] `RecurringExpensesPage` (lista de recurrencias)
+  - [ ] `AddRecurringExpensePage`
+  - [ ] `EditRecurringExpensePage`
+  - [ ] Widget de próxima generación
+- [ ] **Integración** - Pendiente
+  - [ ] Llamar generación automática al iniciar app
+  - [ ] Notificación de gastos generados
+  - [ ] Background service (opcional)
 - [ ] Adjuntar fotos de recibos (image_picker)
 - [ ] Galería de recibos por gasto
 - [ ] Categorías personalizadas del usuario
@@ -408,14 +449,19 @@ lib/
   - Pendiente: Firebase Crashlytics, Testing completo
 - ✅ Fase 3: Persistencia y Seguridad (90%) ⭐ COMPLETADA
   - Pendiente: Backup automático, encriptación, Apple Sign-In
-- ⚪ Fase 4: Mejoras de UX/UI (0%)
+- 🔄 Fase 4: Mejoras de UX/UI (45%) ⭐ EN PROGRESO
+  - ✅ Búsqueda y filtros avanzados (100%)
+  - ✅ Gastos recurrentes - Backend (100%)
+  - ⚪ Gastos recurrentes - UI (0%)
+  - ⚪ Onboarding (0%)
+  - ⚪ Mejoras de interfaz (0%)
 - ⚪ Fase 5: Analytics Profesionales (0%)
 - ⚪ Fase 6: Configuración y Personalización (0%)
 - ⚪ Fase 7: Lanzamiento (0%)
 
 ### Completitud Estimada
 ```
-██████████████░░░░░░ 70%
+███████████████░░░░░ 75%
 ```
 
 ---
@@ -537,7 +583,7 @@ Este es un proyecto personal, pero las sugerencias son bienvenidas.
 
 ---
 
-**Última actualización del roadmap**: 19 de Noviembre, 2025
-**Versión actual**: 0.4.0 (Beta - Multi-dispositivo con sincronización en la nube)
-**Versión anterior**: 0.3.0 (Estabilidad y exportación)
-**Próxima versión planeada**: 0.5.0 (Mejoras de UX/UI - Fase 4)
+**Última actualización del roadmap**: 21 de Noviembre, 2025
+**Versión actual**: 0.5.0 (Búsqueda avanzada + Backend de gastos recurrentes)
+**Versión anterior**: 0.4.0 (Multi-dispositivo con sincronización en la nube)
+**Próxima versión planeada**: 0.6.0 (UI de gastos recurrentes completa)

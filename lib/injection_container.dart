@@ -13,14 +13,25 @@ import 'features/auth/domain/usecases/sign_up_with_email.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/expenses/data/datasources/expense_local_datasource.dart';
 import 'features/expenses/data/datasources/expense_remote_datasource.dart';
+import 'features/expenses/data/datasources/recurring_expense_local_datasource.dart';
 import 'features/expenses/data/repositories/expense_repository_impl.dart';
+import 'features/expenses/data/repositories/recurring_expense_repository_impl.dart';
 import 'features/expenses/domain/repositories/expense_repository.dart';
+import 'features/expenses/domain/repositories/recurring_expense_repository.dart';
 import 'features/expenses/domain/usecases/get_all_expenses.dart';
 import 'features/expenses/domain/usecases/add_expense.dart';
 import 'features/expenses/domain/usecases/delete_expense.dart';
 import 'features/expenses/domain/usecases/update_expense.dart';
+import 'features/expenses/domain/usecases/search_expenses.dart';
+import 'features/expenses/domain/usecases/create_recurring_expense.dart';
+import 'features/expenses/domain/usecases/get_all_recurring_expenses.dart';
+import 'features/expenses/domain/usecases/update_recurring_expense.dart';
+import 'features/expenses/domain/usecases/delete_recurring_expense.dart';
+import 'features/expenses/domain/usecases/generate_expenses_from_recurring.dart';
 import 'features/expenses/presentation/blocs/expenses_bloc.dart';
+import 'features/expenses/presentation/blocs/filter_bloc.dart';
 import 'features/expenses/data/models/expense_model.dart';
+import 'features/expenses/data/models/recurring_expense_model.dart';
 import 'features/budget/data/datasources/budget_local_datasource.dart';
 import 'features/budget/data/repositories/budget_repository_impl.dart';
 import 'features/budget/domain/repositories/budget_repository.dart';
@@ -43,10 +54,17 @@ final sl = GetIt.instance;
 final getIt = sl;
 
 
-Future<void> init(Box<ExpenseModel> expenseBox, Box<BudgetModel> budgetBox) async {
+Future<void> init(
+  Box<ExpenseModel> expenseBox,
+  Box<BudgetModel> budgetBox,
+  Box<RecurringExpenseModel> recurringExpenseBox,
+) async {
 // datasources - Expenses
 sl.registerLazySingleton<ExpenseLocalDataSource>(() => ExpenseLocalDataSourceImpl(expenseBox));
 sl.registerLazySingleton<ExpenseRemoteDataSource>(() => ExpenseRemoteDataSourceImpl());
+sl.registerLazySingleton<RecurringExpenseLocalDataSource>(
+  () => RecurringExpenseLocalDataSourceImpl(recurringExpenseBox),
+);
 
 // datasources - Budget
 sl.registerLazySingleton<BudgetLocalDataSource>(() => BudgetLocalDataSourceImpl(budgetBox: budgetBox));
@@ -62,12 +80,18 @@ sl.registerLazySingleton<ExpenseRepository>(() => ExpenseRepositoryImpl(
 // repositories - Budget
 sl.registerLazySingleton<BudgetRepository>(() => BudgetRepositoryImpl(localDataSource: sl()));
 
+// repositories - Recurring Expenses
+sl.registerLazySingleton<RecurringExpenseRepository>(
+  () => RecurringExpenseRepositoryImpl(localDataSource: sl()),
+);
+
 
 // usecases - Expenses
 sl.registerLazySingleton(() => GetAllExpenses(sl()));
 sl.registerLazySingleton(() => AddExpense(sl()));
 sl.registerLazySingleton(() => DeleteExpense(sl()));
 sl.registerLazySingleton(() => UpdateExpense(sl()));
+sl.registerLazySingleton(() => SearchExpenses(sl()));
 
 // usecases - Budget
 sl.registerLazySingleton(() => CreateBudget(sl()));
@@ -76,9 +100,20 @@ sl.registerLazySingleton(() => UpdateBudget(sl()));
 sl.registerLazySingleton(() => DeleteBudget(sl()));
 sl.registerLazySingleton(() => CalculateBudgetStatus(sl())); // usa ExpenseRepository
 
+// usecases - Recurring Expenses
+sl.registerLazySingleton(() => CreateRecurringExpense(sl()));
+sl.registerLazySingleton(() => GetAllRecurringExpenses(sl()));
+sl.registerLazySingleton(() => UpdateRecurringExpense(sl()));
+sl.registerLazySingleton(() => DeleteRecurringExpense(sl()));
+sl.registerLazySingleton(() => GenerateExpensesFromRecurring(
+  recurringRepository: sl(),
+  expenseRepository: sl(),
+));
+
 
 // blocs - Expenses
 sl.registerFactory(() => ExpensesBloc(getAll: sl(), addExpense: sl(), deleteExpense: sl(), updateExpense: sl()));
+sl.registerFactory(() => FilterBloc(searchExpenses: sl()));
 
 // blocs - Budget
 sl.registerFactory(() => BudgetBloc(

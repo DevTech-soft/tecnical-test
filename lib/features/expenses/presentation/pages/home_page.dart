@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/expenses_bloc.dart';
+import '../blocs/filter_bloc.dart';
 import 'add_expense_page.dart';
 import 'edit_expense_page.dart';
+import 'search_expenses_page.dart';
 import '../../domain/entities/expense.dart';
 import '../widgets/expense_card.dart';
 import '../widgets/expense_summary_card.dart';
@@ -262,6 +264,29 @@ class _HomePageState extends State<HomePage> {
       backgroundColor:
           isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
       actions: [
+        IconButton(
+          icon: Icon(
+            Icons.search,
+            color:
+                _isScrolled
+                    ? (isDark
+                        ? AppColors.textPrimaryDark
+                        : AppColors.textPrimaryLight)
+                    : Colors.white,
+          ),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => BlocProvider(
+                  create: (_) => sl<FilterBloc>(),
+                  child: const SearchExpensesPage(),
+                ),
+              ),
+            );
+          },
+          tooltip: 'Buscar gastos',
+        ),
         PopupMenuButton<String>(
           icon: Icon(
             Icons.more_vert,
