@@ -349,46 +349,12 @@ class _HomePageState extends State<HomePage> {
         ),
       ],
       flexibleSpace: FlexibleSpaceBar(
-        centerTitle: false,
-        titlePadding: const EdgeInsets.only(
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
-        ),
-        title: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Greeting con nombre del usuario
-            BlocBuilder<AuthBloc, AuthState>(
-              builder: (context, state) {
-                if (state is Authenticated) {
-                  final greeting = _getGreeting();
-                  final userName = state.user.fullName.split(' ').first;
-                  return Text(
-                    '$greeting, $userName...',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color:
-                          _isScrolled
-                              ? (isDark
-                                  ? AppColors.textPrimaryDark
-                                  : AppColors.textPrimaryLight)
-                              : Colors.white,
-                    ),
-                  );
-                }
-                return const SizedBox.shrink();
-              },
-            ),
-            const SizedBox(height: 4),
-            // Date filter
-            DateFilterSelector(
-              selectedDate: _selectedDate,
-              onTap: _selectDate,
-              isScrolled: _isScrolled,
-            ),
-          ],
+        centerTitle: true,
+        titlePadding: const EdgeInsets.only(bottom: AppSpacing.md),
+        title: DateFilterSelector(
+          selectedDate: _selectedDate,
+          onTap: _selectDate,
+          isScrolled: _isScrolled,
         ),
         background: Container(
           decoration: BoxDecoration(
