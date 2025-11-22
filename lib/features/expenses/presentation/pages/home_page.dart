@@ -5,6 +5,7 @@ import '../blocs/filter_bloc.dart';
 import 'add_expense_page.dart';
 import 'edit_expense_page.dart';
 import 'search_expenses_page.dart';
+import 'recurring_expenses_page.dart';
 import '../../domain/entities/expense.dart';
 import '../widgets/expense_card.dart';
 import '../widgets/expense_summary_card.dart';
@@ -298,7 +299,14 @@ class _HomePageState extends State<HomePage> {
                     : Colors.white,
           ),
           onSelected: (value) {
-            if (value == 'export') {
+            if (value == 'recurring') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const RecurringExpensesPage(),
+                ),
+              );
+            } else if (value == 'export') {
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -340,6 +348,16 @@ class _HomePageState extends State<HomePage> {
           },
           itemBuilder:
               (context) => [
+                const PopupMenuItem(
+                  value: 'recurring',
+                  child: Row(
+                    children: [
+                      Icon(Icons.repeat, size: 20),
+                      SizedBox(width: 12),
+                      Text('Gastos Recurrentes'),
+                    ],
+                  ),
+                ),
                 const PopupMenuItem(
                   value: 'export',
                   child: Row(

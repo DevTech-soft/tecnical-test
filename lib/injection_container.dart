@@ -30,6 +30,7 @@ import 'features/expenses/domain/usecases/delete_recurring_expense.dart';
 import 'features/expenses/domain/usecases/generate_expenses_from_recurring.dart';
 import 'features/expenses/presentation/blocs/expenses_bloc.dart';
 import 'features/expenses/presentation/blocs/filter_bloc.dart';
+import 'features/expenses/presentation/blocs/recurring_expenses_bloc.dart';
 import 'features/expenses/data/models/expense_model.dart';
 import 'features/expenses/data/models/recurring_expense_model.dart';
 import 'features/budget/data/datasources/budget_local_datasource.dart';
@@ -114,6 +115,13 @@ sl.registerLazySingleton(() => GenerateExpensesFromRecurring(
 // blocs - Expenses
 sl.registerFactory(() => ExpensesBloc(getAll: sl(), addExpense: sl(), deleteExpense: sl(), updateExpense: sl()));
 sl.registerFactory(() => FilterBloc(searchExpenses: sl()));
+sl.registerFactory(() => RecurringExpensesBloc(
+  getAllRecurringExpenses: sl(),
+  createRecurringExpense: sl(),
+  updateRecurringExpense: sl(),
+  deleteRecurringExpense: sl(),
+  generateExpensesFromRecurring: sl(),
+));
 
 // blocs - Budget
 sl.registerFactory(() => BudgetBloc(
