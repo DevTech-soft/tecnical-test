@@ -99,4 +99,38 @@ class RecurringExpenseModel extends HiveObject {
   static String _frequencyTypeToString(FrequencyType frequency) {
     return frequency.toString().split('.').last;
   }
+
+  /// Serializa el modelo a JSON para Firestore
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'amount': amount,
+      'categoryId': categoryId,
+      'note': note,
+      'frequency': frequency,
+      'startDate': startDate.toIso8601String(),
+      'endDate': endDate?.toIso8601String(),
+      'lastGenerated': lastGenerated?.toIso8601String(),
+      'isActive': isActive,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
+    };
+  }
+
+  /// Deserializa desde JSON de Firestore
+  factory RecurringExpenseModel.fromJson(Map<String, dynamic> json) {
+    return RecurringExpenseModel(
+      id: json['id'] as String,
+      amount: (json['amount'] as num).toDouble(),
+      categoryId: json['categoryId'] as String,
+      note: json['note'] as String?,
+      frequency: json['frequency'] as String,
+      startDate: DateTime.parse(json['startDate'] as String),
+      endDate: json['endDate'] != null ? DateTime.parse(json['endDate'] as String) : null,
+      lastGenerated: json['lastGenerated'] != null ? DateTime.parse(json['lastGenerated'] as String) : null,
+      isActive: json['isActive'] as bool,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
+    );
+  }
 }

@@ -95,20 +95,43 @@ class CategoryHelper {
   // Alias para compatibilidad
   static List<ExpenseCategory> get defaultCategories => allCategories;
 
+  // Lista de todas las categorías cargadas (predefinidas + personalizadas)
+  static List<ExpenseCategory> _loadedCategories = [];
+
+  /// Actualiza la lista de categorías cargadas (debe ser llamado por CategoryBloc)
+  static void updateLoadedCategories(List<ExpenseCategory> categories) {
+    _loadedCategories = categories;
+  }
+
+  /// Busca una categoría por ID en todas las categorías cargadas
+  /// Si no está cargada, busca en las predefinidas como fallback
   static ExpenseCategory getCategoryById(String id) {
+    // Primero buscar en las categorías cargadas (incluye personalizadas)
     try {
-      return allCategories.firstWhere((cat) => cat.id == id);
+      return _loadedCategories.firstWhere((cat) => cat.id == id);
     } catch (e) {
-      return other;
+      // Si no se encuentra, buscar en las predefinidas como fallback
+      try {
+        return allCategories.firstWhere((cat) => cat.id == id);
+      } catch (e) {
+        return other;
+      }
     }
   }
 
   static ExpenseCategory? getCategoryByIdOrNull(String? id) {
     if (id == null) return null;
+
+    // Primero buscar en las categorías cargadas (incluye personalizadas)
     try {
-      return allCategories.firstWhere((cat) => cat.id == id);
+      return _loadedCategories.firstWhere((cat) => cat.id == id);
     } catch (e) {
-      return null;
+      // Si no se encuentra, buscar en las predefinidas como fallback
+      try {
+        return allCategories.firstWhere((cat) => cat.id == id);
+      } catch (e) {
+        return null;
+      }
     }
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../domain/entities/budget_alert_level.dart';
@@ -14,6 +15,11 @@ class BudgetProgressCard extends StatelessWidget {
     required this.budgetStatus,
     this.onTap,
   }) : super(key: key);
+
+  String _formatCurrency(double amount) {
+    final formatter = NumberFormat('#,##0', 'es');
+    return '\$${formatter.format(amount.round())}';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,48 +84,54 @@ class BudgetProgressCard extends StatelessWidget {
               ],
             ),
 
-            SizedBox(height: AppSpacing.lg.h),
+            SizedBox(height: AppSpacing.xl.h),
 
-            // Montos
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            // Montos - Diseño mejorado
+            Column(
               children: [
-                _buildAmountColumn(
-                  label: 'Gastado',
-                  amount: budgetStatus.spent,
-                  color: alertColor,
-                  isDark: isDark,
+                // Gastado y Presupuesto
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildAmountCard(
+                        label: 'Gastado',
+                        amount: budgetStatus.spent,
+                        icon: Icons.arrow_upward,
+                        color: alertColor,
+                        isDark: isDark,
+                      ),
+                    ),
+                    SizedBox(width: AppSpacing.md.w),
+                    Expanded(
+                      child: _buildAmountCard(
+                        label: 'Presupuesto',
+                        amount: budgetStatus.budget.amount,
+                        icon: Icons.account_balance_wallet,
+                        color: AppColors.info,
+                        isDark: isDark,
+                      ),
+                    ),
+                  ],
                 ),
-                Container(
-                  width: 1,
-                  height: 40.h,
-                  color: (isDark ? AppColors.grey700 : AppColors.grey300)
-                      .withValues(alpha:0.5),
-                ),
-                _buildAmountColumn(
-                  label: 'Presupuesto',
-                  amount: budgetStatus.budget.amount,
-                  color: isDark ? AppColors.grey400 : AppColors.grey700,
-                  isDark: isDark,
-                ),
-                Container(
-                  width: 1,
-                  height: 40.h,
-                  color: (isDark ? AppColors.grey700 : AppColors.grey300)
-                      .withValues(alpha:0.5),
-                ),
-                _buildAmountColumn(
-                  label: budgetStatus.remaining > 0 ? 'Restante' : 'Excedido',
+                SizedBox(height: AppSpacing.md.h),
+                // Restante/Excedido
+                _buildAmountCard(
+                  label: budgetStatus.remaining > 0 ? 'Disponible' : 'Excedido',
                   amount: budgetStatus.remaining.abs(),
+                  icon:
+                      budgetStatus.remaining > 0
+                          ? Icons.check_circle_outline
+                          : Icons.warning_amber_rounded,
                   color: budgetStatus.remaining > 0
                       ? AppColors.success
                       : AppColors.error,
                   isDark: isDark,
+                  isFullWidth: true,
                 ),
               ],
             ),
 
-            SizedBox(height: AppSpacing.lg.h),
+            SizedBox(height: AppSpacing.xl.h),
 
             // Barra de progreso
             Column(
@@ -210,7 +222,7 @@ class BudgetProgressCard extends StatelessWidget {
                   child: _buildInfoChip(
                     icon: Icons.trending_up,
                     label: 'Promedio diario',
-                    value: '\$${budgetStatus.dailyAverage.toStringAsFixed(2)}',
+                    value: _formatCurrency(budgetStatus.dailyAverage),
                     isDark: isDark,
                   ),
                 ),
@@ -219,8 +231,9 @@ class BudgetProgressCard extends StatelessWidget {
                   child: _buildInfoChip(
                     icon: Icons.recommend,
                     label: 'Recomendado/día',
-                    value:
-                        '\$${budgetStatus.recommendedDailySpending.toStringAsFixed(2)}',
+                    value: _formatCurrency(
+                      budgetStatus.recommendedDailySpending,
+                    ),
                     isDark: isDark,
                   ),
                 ),
@@ -232,37 +245,110 @@ class BudgetProgressCard extends StatelessWidget {
     );
   }
 
-  Widget _buildAmountColumn({
+  Widget _buildAmountCard({
     required String label,
     required double amount,
+    required IconData icon,
     required Color color,
     required bool isDark,
+    bool isFullWidth = false,
   }) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11.sp,
-              color: isDark
-                  ? AppColors.textSecondaryDark
-                  : AppColors.textSecondaryLight,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            '\$${amount.toStringAsFixed(2)}',
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
+    return Container(
+      padding: EdgeInsets.all(AppSpacing.lg.w),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color.withValues(alpha: 0.15),
+            color.withValues(alpha: 0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
+      child:
+          isFullWidth
+              ? Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(AppSpacing.sm.w),
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(10.r),
+                    ),
+                    child: Icon(icon, color: color, size: 24.sp),
+                  ),
+                  SizedBox(width: AppSpacing.md.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          label,
+                          style: TextStyle(
+                            fontSize: 13.sp,
+                            color:
+                                isDark
+                                    ? AppColors.textSecondaryDark
+                                    : AppColors.textSecondaryLight,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        SizedBox(height: 4.h),
+                        Text(
+                          _formatCurrency(amount),
+                          style: TextStyle(
+                            fontSize: 20.sp,
+                            fontWeight: FontWeight.bold,
+                            color: color,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              )
+              : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(icon, color: color, size: 18.sp),
+                      SizedBox(width: AppSpacing.xs.w),
+                      Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color:
+                              isDark
+                                  ? AppColors.textSecondaryDark
+                                  : AppColors.textSecondaryLight,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: AppSpacing.sm.h),
+                  Text(
+                    _formatCurrency(amount),
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.bold,
+                      color: color,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                ],
+              ),
     );
   }
 

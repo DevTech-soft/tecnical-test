@@ -4,17 +4,24 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/main_navigation/main_navigation_page.dart';
 import 'injection_container.dart' as di;
 import 'features/expenses/data/models/expense_model.dart';
 import 'features/expenses/data/models/recurring_expense_model.dart';
+import 'features/expenses/data/models/category_model.dart';
 import 'features/budget/data/models/budget_model.dart';
 import 'core/theme/app_theme.dart';
+import 'features/expenses/presentation/blocs/category_bloc.dart';
+import 'features/expenses/presentation/blocs/category_event.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize date formatting for Spanish locale
+  await initializeDateFormatting('es');
 
   // Initialize Firebase
   await Firebase.initializeApp();
@@ -24,13 +31,19 @@ void main() async {
   Hive.registerAdapter(ExpenseModelAdapter());
   Hive.registerAdapter(BudgetModelAdapter());
   Hive.registerAdapter(RecurringExpenseModelAdapter());
+  Hive.registerAdapter(CategoryModelAdapter());
 
   final expenseBox = await Hive.openBox<ExpenseModel>('expensesBox');
   final budgetBox = await Hive.openBox<BudgetModel>('budgetsBox');
   final recurringExpenseBox = await Hive.openBox<RecurringExpenseModel>('recurringExpensesBox');
+  final categoryBox = await Hive.openBox<CategoryModel>('categoriesBox');
 
   // Initialize dependency injection
-  await di.init(expenseBox, budgetBox, recurringExpenseBox);
+  await di.init(expenseBox, budgetBox, recurringExpenseBox, categoryBox);
+
+  // Initialize default categories if needed
+  final categoryBloc = di.getIt<CategoryBloc>();
+  categoryBloc.add(const InitializeDefaultCategoriesEvent());
 
   // Set system UI overlay style
   SystemChrome.setSystemUIOverlayStyle(

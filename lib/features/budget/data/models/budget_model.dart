@@ -82,4 +82,30 @@ class BudgetModel extends HiveObject {
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
+
+  /// Serializa el modelo a JSON para Firestore
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'amount': amount,
+      'month': month,
+      'year': year,
+      'categoryId': categoryId,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
+    };
+  }
+
+  /// Deserializa desde JSON de Firestore
+  factory BudgetModel.fromJson(Map<String, dynamic> json) {
+    return BudgetModel(
+      id: json['id'] as String,
+      amount: (json['amount'] as num).toDouble(),
+      month: json['month'] as int,
+      year: json['year'] as int,
+      categoryId: json['categoryId'] as String?,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
+    );
+  }
 }

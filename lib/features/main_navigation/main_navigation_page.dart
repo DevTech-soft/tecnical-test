@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../expenses/presentation/pages/home_page.dart';
 import '../budget/presentation/pages/budget_page.dart';
 import '../analytics/presentation/pages/analytics_page.dart';
@@ -7,16 +8,30 @@ import '../../core/theme/app_colors.dart';
 import '../../core/usecases/usecase.dart';
 import '../../injection_container.dart';
 import '../expenses/domain/usecases/generate_expenses_from_recurring.dart';
+import '../expenses/presentation/blocs/category_bloc.dart';
+import '../expenses/presentation/blocs/category_event.dart';
 import '../../core/utils/app_logger.dart';
 
-class MainNavigationPage extends StatefulWidget {
+class MainNavigationPage extends StatelessWidget {
   const MainNavigationPage({super.key});
 
   @override
-  State<MainNavigationPage> createState() => _MainNavigationPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => sl<CategoryBloc>()..add(const LoadCategories()),
+      child: const _MainNavigationPageContent(),
+    );
+  }
 }
 
-class _MainNavigationPageState extends State<MainNavigationPage> {
+class _MainNavigationPageContent extends StatefulWidget {
+  const _MainNavigationPageContent();
+
+  @override
+  State<_MainNavigationPageContent> createState() => _MainNavigationPageState();
+}
+
+class _MainNavigationPageState extends State<_MainNavigationPageContent> {
   int _currentIndex = 0;
   final _logger = AppLogger('MainNavigationPage');
 
@@ -30,8 +45,27 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   @override
   void initState() {
     super.initState();
+    // Sincronizar todos los datos con Firebase cuando el usuario entra
+    _syncAllData();
     // Generar gastos desde recurrencias al iniciar la app
     _generateRecurringExpenses();
+  }
+
+  /// Sincroniza todos los datos locales con Firebase
+  Future<void> _syncAllData() async {
+    try {
+      _logger.info('Iniciando sincronización completa de datos con Firebase');
+
+      // Sincronizar categorías (esto también inicializará las predefinidas si no existen)
+      context.read<CategoryBloc>().add(const InitializeDefaultCategoriesEvent());
+
+      // Las demás colecciones se sincronizarán automáticamente cuando se llamen
+      // sus respectivos métodos getAllXXX() gracias al patrón offline-first
+
+      _logger.info('Sincronización de datos iniciada correctamente');
+    } catch (e, stackTrace) {
+      _logger.error('Error al sincronizar datos', e, stackTrace);
+    }
   }
 
   Future<void> _generateRecurringExpenses() async {

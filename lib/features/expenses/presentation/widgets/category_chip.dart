@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/category.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../blocs/category_bloc.dart';
+import '../blocs/category_state.dart';
 
 class CategoryChip extends StatelessWidget {
   final ExpenseCategory category;
@@ -75,16 +78,44 @@ class CategorySelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: AppSpacing.sm,
-      runSpacing: AppSpacing.sm,
-      children: CategoryHelper.allCategories.map((category) {
-        return CategoryChip(
-          category: category,
-          isSelected: selectedCategory?.id == category.id,
-          onTap: () => onCategorySelected?.call(category),
+    return BlocBuilder<CategoryBloc, CategoryState>(
+      builder: (context, state) {
+        List<ExpenseCategory> categories = [];
+
+        if (state is CategoryLoaded) {
+          categories = state.categories;
+        } else if (state is CategoryOperationSuccess) {
+          categories = state.categories;
+        } else if (state is CategoryLoading || state is CategoryInitial) {
+          // Mostrar shimmer o loading mientras carga
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(AppSpacing.md),
+              child: CircularProgressIndicator(),
+            ),
+          );
+        } else if (state is CategoryError) {
+          // Fallback a categorías predefinidas en caso de error
+          categories = CategoryHelper.allCategories;
+        }
+
+        // Si no hay categorías, usar las predefinidas como fallback
+        if (categories.isEmpty) {
+          categories = CategoryHelper.allCategories;
+        }
+
+        return Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          children: categories.map((category) {
+            return CategoryChip(
+              category: category,
+              isSelected: selectedCategory?.id == category.id,
+              onTap: () => onCategorySelected?.call(category),
+            );
+          }).toList(),
         );
-      }).toList(),
+      },
     );
   }
 }

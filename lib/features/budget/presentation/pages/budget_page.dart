@@ -4,6 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../injection_container.dart';
+import '../../domain/entities/budget_alert_level.dart';
+import '../../domain/entities/budget_status.dart';
 import '../bloc/budget_bloc.dart';
 import '../bloc/budget_event.dart';
 import '../bloc/budget_state.dart';
@@ -126,38 +128,16 @@ class _BudgetPageState extends State<BudgetPage> {
 
                           // Información adicional
                           if (state.hasBudget && state.status != null) ...[
+                            // Estadísticas rápidas
+                            _buildQuickStats(state.status!, isDark),
+                            SizedBox(height: AppSpacing.xl.h),
+
+                            // Consejos dinámicos de ahorro
                             _buildInfoSection(
-                              title: 'Consejos de Ahorro',
+                              title: 'Consejos Personalizados',
                               icon: Icons.lightbulb_outline,
                               isDark: isDark,
-                              children: [
-                                _buildTipCard(
-                                  icon: Icons.trending_down,
-                                  title: 'Reduce gastos innecesarios',
-                                  description:
-                                      'Revisa tus gastos y elimina aquellos que no son esenciales',
-                                  color: AppColors.info,
-                                  isDark: isDark,
-                                ),
-                                SizedBox(height: AppSpacing.sm.h),
-                                _buildTipCard(
-                                  icon: Icons.savings_outlined,
-                                  title: 'Ahorra un porcentaje fijo',
-                                  description:
-                                      'Destina al menos el 20% de tus ingresos al ahorro',
-                                  color: AppColors.success,
-                                  isDark: isDark,
-                                ),
-                                SizedBox(height: AppSpacing.sm.h),
-                                _buildTipCard(
-                                  icon: Icons.compare_arrows,
-                                  title: 'Compara antes de comprar',
-                                  description:
-                                      'Busca las mejores ofertas antes de hacer una compra',
-                                  color: AppColors.warning,
-                                  isDark: isDark,
-                                ),
-                              ],
+                              children: _buildDynamicTips(state.status!, isDark),
                             ),
                           ],
                         ],
@@ -268,23 +248,38 @@ class _BudgetPageState extends State<BudgetPage> {
       padding: EdgeInsets.all(AppSpacing.md.w),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
           color: color.withValues(alpha: 0.3),
+          width: 1.5,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
           Container(
-            padding: EdgeInsets.all(AppSpacing.sm.w),
+            padding: EdgeInsets.all(AppSpacing.md.w),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(8.r),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  color.withValues(alpha: 0.3),
+                  color.withValues(alpha: 0.15),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(12.r),
             ),
             child: Icon(
               icon,
               color: color,
-              size: 24.sp,
+              size: 28.sp,
             ),
           ),
           SizedBox(width: AppSpacing.md.w),
@@ -295,19 +290,22 @@ class _BudgetPageState extends State<BudgetPage> {
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
-                    color: color,
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.bold,
+                    color: isDark
+                        ? AppColors.textPrimaryDark
+                        : AppColors.textPrimaryLight,
                   ),
                 ),
-                SizedBox(height: 4.h),
+                SizedBox(height: 6.h),
                 Text(
                   description,
                   style: TextStyle(
-                    fontSize: 12.sp,
+                    fontSize: 13.sp,
                     color: isDark
                         ? AppColors.textSecondaryDark
                         : AppColors.textSecondaryLight,
+                    height: 1.4,
                   ),
                 ),
               ],
@@ -316,5 +314,251 @@ class _BudgetPageState extends State<BudgetPage> {
         ],
       ),
     );
+  }
+
+  Widget _buildQuickStats(BudgetStatus status, bool isDark) {
+    return Container(
+      padding: EdgeInsets.all(AppSpacing.lg.w),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.primary.withValues(alpha: 0.08),
+            AppColors.secondary.withValues(alpha: 0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: 0.15),
+          width: 1.5,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.analytics_outlined,
+                color: AppColors.primary,
+                size: 24.sp,
+              ),
+              SizedBox(width: AppSpacing.sm.w),
+              Text(
+                'Análisis Rápido',
+                style: TextStyle(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.bold,
+                  color: isDark
+                      ? AppColors.textPrimaryDark
+                      : AppColors.textPrimaryLight,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: AppSpacing.lg.h),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.calendar_today,
+                  label: 'Días transcurridos',
+                  value: '${DateTime.now().day} días',
+                  color: AppColors.info,
+                  isDark: isDark,
+                ),
+              ),
+              SizedBox(width: AppSpacing.sm.w),
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.speed,
+                  label: 'Ritmo de gasto',
+                  value: _getSpendingPaceLabel(status),
+                  color: _getSpendingPaceColor(status),
+                  isDark: isDark,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: AppSpacing.sm.h),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.trending_up,
+                  label: 'Gasto diario',
+                  value: '\$${status.dailyAverage.toStringAsFixed(0)}',
+                  color: AppColors.warning,
+                  isDark: isDark,
+                ),
+              ),
+              SizedBox(width: AppSpacing.sm.w),
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.track_changes,
+                  label: 'Meta diaria',
+                  value: '\$${status.recommendedDailySpending.toStringAsFixed(0)}',
+                  color: AppColors.success,
+                  isDark: isDark,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatCard({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+    required bool isDark,
+  }) {
+    return Container(
+      padding: EdgeInsets.all(AppSpacing.md.w),
+      decoration: BoxDecoration(
+        color: isDark
+            ? AppColors.grey800.withValues(alpha: 0.4)
+            : Colors.white.withValues(alpha: 0.7),
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(
+          color: color.withValues(alpha: 0.2),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            icon,
+            color: color,
+            size: 20.sp,
+          ),
+          SizedBox(height: AppSpacing.sm.h),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11.sp,
+              color: isDark
+                  ? AppColors.textSecondaryDark
+                  : AppColors.textSecondaryLight,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _buildDynamicTips(BudgetStatus status, bool isDark) {
+    final tips = <Widget>[];
+
+    // Consejos basados en el nivel de alerta
+    if (status.alertLevel == BudgetAlertLevel.safe) {
+      tips.add(_buildTipCard(
+        icon: Icons.check_circle_outline,
+        title: '¡Excelente control!',
+        description: 'Mantienes un buen ritmo de gastos. Considera aumentar tu ahorro mensual.',
+        color: AppColors.success,
+        isDark: isDark,
+      ));
+    } else if (status.alertLevel == BudgetAlertLevel.warning ||
+               status.alertLevel == BudgetAlertLevel.critical) {
+      tips.add(_buildTipCard(
+        icon: Icons.warning_amber_rounded,
+        title: 'Modera tus gastos',
+        description: 'Estás gastando más rápido de lo planeado. Revisa tus gastos recientes y evita compras innecesarias.',
+        color: AppColors.warning,
+        isDark: isDark,
+      ));
+    } else if (status.alertLevel == BudgetAlertLevel.exceeded) {
+      tips.add(_buildTipCard(
+        icon: Icons.priority_high,
+        title: 'Presupuesto excedido',
+        description: 'Has superado tu límite. Considera ajustar tu presupuesto o reducir gastos significativamente.',
+        color: AppColors.error,
+        isDark: isDark,
+      ));
+    }
+
+    tips.add(SizedBox(height: AppSpacing.sm.h));
+
+    // Consejo sobre gasto diario
+    if (status.dailyAverage > status.recommendedDailySpending) {
+      tips.add(_buildTipCard(
+        icon: Icons.insights,
+        title: 'Ajusta tu ritmo diario',
+        description: 'Tu gasto diario promedio (\$${status.dailyAverage.toStringAsFixed(0)}) supera lo recomendado (\$${status.recommendedDailySpending.toStringAsFixed(0)}). Intenta reducirlo.',
+        color: AppColors.info,
+        isDark: isDark,
+      ));
+      tips.add(SizedBox(height: AppSpacing.sm.h));
+    }
+
+    // Consejos generales de ahorro
+    tips.add(_buildTipCard(
+      icon: Icons.savings_outlined,
+      title: 'Regla del 50/30/20',
+      description: '50% necesidades, 30% deseos, 20% ahorros. Una fórmula probada para finanzas saludables.',
+      color: const Color(0xFF7E57C2),
+      isDark: isDark,
+    ));
+
+    tips.add(SizedBox(height: AppSpacing.sm.h));
+
+    tips.add(_buildTipCard(
+      icon: Icons.compare_arrows,
+      title: 'Compara antes de comprar',
+      description: 'Busca ofertas y descuentos. Usar comparadores puede ahorrarte hasta un 30%.',
+      color: const Color(0xFF26A69A),
+      isDark: isDark,
+    ));
+
+    return tips;
+  }
+
+  String _getSpendingPaceLabel(BudgetStatus status) {
+    final daysInMonth = DateTime(
+      DateTime.now().year,
+      DateTime.now().month + 1,
+      0,
+    ).day;
+    final daysElapsed = DateTime.now().day;
+    final expectedPercentage = (daysElapsed / daysInMonth) * 100;
+    final actualPercentage = status.percentageDisplay;
+
+    if (actualPercentage <= expectedPercentage - 10) {
+      return 'Bajo';
+    } else if (actualPercentage <= expectedPercentage + 10) {
+      return 'Normal';
+    } else {
+      return 'Alto';
+    }
+  }
+
+  Color _getSpendingPaceColor(BudgetStatus status) {
+    final pace = _getSpendingPaceLabel(status);
+    switch (pace) {
+      case 'Bajo':
+        return AppColors.success;
+      case 'Normal':
+        return AppColors.info;
+      case 'Alto':
+        return AppColors.error;
+      default:
+        return AppColors.info;
+    }
   }
 }

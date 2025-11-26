@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/expenses_bloc.dart';
 import '../blocs/filter_bloc.dart';
+import '../blocs/category_bloc.dart';
 import 'add_expense_page.dart';
 import 'edit_expense_page.dart';
 import 'search_expenses_page.dart';
 import 'recurring_expenses_page.dart';
+import 'manage_categories_page.dart';
 import '../../domain/entities/expense.dart';
 import '../widgets/expense_card.dart';
 import '../widgets/expense_summary_card.dart';
@@ -61,8 +63,11 @@ class _HomePageState extends State<HomePage> {
       context,
       MaterialPageRoute(
         builder:
-            (_) => BlocProvider.value(
-              value: _expensesBloc,
+            (_) => MultiBlocProvider(
+              providers: [
+                BlocProvider.value(value: _expensesBloc),
+                BlocProvider.value(value: context.read<CategoryBloc>()),
+              ],
               child: const AddExpensePage(),
             ),
       ),
@@ -77,8 +82,11 @@ class _HomePageState extends State<HomePage> {
       context,
       MaterialPageRoute(
         builder:
-            (_) => BlocProvider.value(
-              value: _expensesBloc,
+            (_) => MultiBlocProvider(
+              providers: [
+                BlocProvider.value(value: _expensesBloc),
+                BlocProvider.value(value: context.read<CategoryBloc>()),
+              ],
               child: EditExpensePage(expense: expense),
             ),
       ),
@@ -273,7 +281,7 @@ class _HomePageState extends State<HomePage> {
                     ? (isDark
                         ? AppColors.textPrimaryDark
                         : AppColors.textPrimaryLight)
-                    : Colors.white,
+                    : AppColors.textPrimaryLight,
           ),
           onPressed: () {
             Navigator.push(
@@ -296,7 +304,7 @@ class _HomePageState extends State<HomePage> {
                     ? (isDark
                         ? AppColors.textPrimaryDark
                         : AppColors.textPrimaryLight)
-                    : Colors.white,
+                    : AppColors.textPrimaryLight,
           ),
           onSelected: (value) {
             if (value == 'recurring') {
@@ -304,6 +312,17 @@ class _HomePageState extends State<HomePage> {
                 context,
                 MaterialPageRoute(
                   builder: (_) => const RecurringExpensesPage(),
+                ),
+              );
+            } else if (value == 'categories') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (_) => BlocProvider.value(
+                        value: context.read<CategoryBloc>(),
+                        child: const ManageCategoriesPage(),
+                      ),
                 ),
               );
             } else if (value == 'export') {
@@ -355,6 +374,16 @@ class _HomePageState extends State<HomePage> {
                       Icon(Icons.repeat, size: 20),
                       SizedBox(width: 12),
                       Text('Gastos Recurrentes'),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'categories',
+                  child: Row(
+                    children: [
+                      Icon(Icons.category, size: 20),
+                      SizedBox(width: 12),
+                      Text('Gestionar Categorías'),
                     ],
                   ),
                 ),
