@@ -1,3 +1,5 @@
+import 'package:dayli_expenses/features/expenses/domain/entities/category.dart';
+import 'package:dayli_expenses/features/expenses/presentation/widgets/expense_info_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/expenses_bloc.dart';
@@ -74,6 +76,7 @@ class _HomePageState extends State<HomePage> {
               providers: [
                 BlocProvider.value(value: _expensesBloc),
                 BlocProvider.value(value: context.read<CategoryBloc>()),
+                BlocProvider.value(value: context.read<AccountBloc>()),
               ],
               child: const AddExpensePage(),
             ),
@@ -167,120 +170,160 @@ class _HomePageState extends State<HomePage> {
               body: ResponsiveBuilder(
                 builder: (context, deviceType) {
                   return CustomScrollView(
-                controller: _scrollController,
-                slivers: [
-                  _buildAppBar(context),
-                  SliverToBoxAdapter(
-                    child: BlocBuilder<AccountBloc, AccountState>(
-                      builder: (context, accountState) {
-                        if (accountState is AccountLoading) {
-                          return _buildLoadingState();
-                        }
-                        if (accountState is AccountLoaded) {
-                          final accounts = accountState.accounts;
+                    controller: _scrollController,
+                    slivers: [
+                      _buildAppBar(context),
+                      SliverPadding(
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        sliver: SliverList(
+                          delegate: SliverChildListDelegate([
+                            BlocBuilder<AccountBloc, AccountState>(
+                              builder: (context, accountState) {
+                                if (accountState is AccountLoading) {
+                                  return _buildLoadingState();
+                                }
+                                if (accountState is AccountLoaded) {
+                                  final accounts = accountState.accounts;
 
-                          return Column(
-                            children: [
-                              ExpenseSummaryCard(accounts: accounts),
-                              AppSpacing.verticalSpaceSM,
-                              BlocBuilder<ExpensesBloc, ExpensesState>(
-                                builder: (context, expenseState) {
-                                  if (expenseState is ExpensesLoaded) {
-                                    final filteredExpenses = _filterExpensesByDate(
-                                      expenseState.expenses,
-                                    );
-                                    return StatsOverview(expenses: filteredExpenses);
-                                  }
-                                  return const SizedBox.shrink();
-                                },
-                              ),
-                              AppSpacing.verticalSpaceMD,
-                              BlocBuilder<ExpensesBloc, ExpensesState>(
-                                builder: (context, expenseState) {
-                                  if (expenseState is ExpensesLoaded) {
-                                    final filteredExpenses = _filterExpensesByDate(
-                                      expenseState.expenses,
-                                    );
-                                    return Padding(
-                                      padding: AppSpacing.paddingHorizontalMD,
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            'Transacciones',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleMedium
-                                                ?.copyWith(
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                          ),
-                                          Text(
-                                            '${filteredExpenses.length} ${filteredExpenses.length == 1 ? 'gasto' : 'gastos'}',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .labelMedium
-                                                ?.copyWith(
-                                                  color: AppColors.textSecondaryLight,
-                                                ),
-                                          ),
-                                        ],
+                                  return Column(
+                                    children: [
+                                      ExpenseSummaryCard(accounts: accounts),
+                                      AppSpacing.verticalSpaceSM,
+                                      BlocBuilder<ExpensesBloc, ExpensesState>(
+                                        builder: (context, expenseState) {
+                                          if (expenseState is ExpensesLoaded) {
+                                            final filteredExpenses =
+                                                _filterExpensesByDate(
+                                                  expenseState.expenses,
+                                                );
+                                            return StatsOverview(
+                                              expenses: filteredExpenses,
+                                            );
+                                          }
+                                          return const SizedBox.shrink();
+                                        },
                                       ),
-                                    );
-                                  }
-                                  return const SizedBox.shrink();
-                                },
-                              ),
-                              AppSpacing.verticalSpaceSM,
-                            ],
-                          );
-                        }
-                        if (accountState is AccountError) {
-                          return _buildErrorState(accountState.message);
-                        }
-                        return const SizedBox.shrink();
-                      },
-                    ),
-                  ),
-                  BlocBuilder<ExpensesBloc, ExpensesState>(
-                    builder: (context, state) {
-                      if (state is ExpensesLoaded) {
-                        final filteredExpenses = _filterExpensesByDate(
-                          state.expenses,
-                        );
+                                      BlocBuilder<ExpensesBloc, ExpensesState>(
+                                        builder: (context, state) {
+                                          if (state is ExpensesLoaded) {
+                                            final allExpenses = state.expenses;
 
-                        if (filteredExpenses.isNotEmpty) {
-                          return SliverList(
-                            delegate: SliverChildBuilderDelegate((
-                              context,
-                              index,
-                            ) {
-                              final expense = filteredExpenses[index];
-                              return ExpenseCard(
-                                expense: expense,
-                                onTap: () => _navigateToEditExpense(expense),
-                                onDelete: () {
-                                  _showDeleteConfirmation(context, expense.id);
-                                },
-                              );
-                            }, childCount: filteredExpenses.length),
-                          );
-                        }
-                      }
-                      return const SliverToBoxAdapter(child: SizedBox.shrink());
-                    },
-                  ),
-                  const SliverToBoxAdapter(
-                    child: SizedBox(height: AppSpacing.xxxl),
-                  ),
-                ],
-              );
-            },
+                                            final totalExpenses = allExpenses
+                                                .fold<double>(
+                                                  0,
+                                                  (sum, expense) =>
+                                                      sum + expense.amount,
+                                                );
+
+                                            final recentExpenses =
+                                                allExpenses.take(2).toList();
+
+                                            return ExpenseInfoCard(
+                                              title: 'Gasto General',
+                                              totalGeneralExpense:
+                                                  totalExpenses.toInt(),
+                                              subtitle: 'Gastos principales',
+                                              child:
+                                                  recentExpenses.isEmpty
+                                                      ? Padding(
+                                                        padding:
+                                                            const EdgeInsets.symmetric(
+                                                              vertical:
+                                                                  AppSpacing.md,
+                                                            ),
+                                                        child: Center(
+                                                          child: Text(
+                                                            'No hay gastos registrados',
+                                                            style: Theme.of(
+                                                                  context,
+                                                                )
+                                                                .textTheme
+                                                                .bodyMedium
+                                                                ?.copyWith(
+                                                                  color:
+                                                                      AppColors
+                                                                          .textSecondaryLight,
+                                                                ),
+                                                          ),
+                                                        ),
+                                                      )
+                                                      : Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceAround,
+                                                        children:
+                                                            recentExpenses.map((
+                                                              expense,
+                                                            ) {
+                                                              final category =
+                                                                  CategoryHelper.getCategoryById(
+                                                                    expense
+                                                                        .categoryId,
+                                                                  );
+                                                              return Expanded(
+                                                                child: Row(
+                                                                  children: [
+                                                                    Container(
+                                                                      width: 8,
+                                                                      height: 8,
+                                                                      decoration: BoxDecoration(
+                                                                        color:
+                                                                            category.color,
+                                                                        shape:
+                                                                            BoxShape.circle,
+                                                                      ),
+                                                                    ),
+                                                                    const SizedBox(
+                                                                      width: 8,
+                                                                    ),
+                                                                    Expanded(
+                                                                      child: Text(
+                                                                        expense.note ??
+                                                                            category.name,
+                                                                        style:
+                                                                            Theme.of(
+                                                                              context,
+                                                                            ).textTheme.bodySmall,
+                                                                        maxLines:
+                                                                            1,
+                                                                        overflow:
+                                                                            TextOverflow.ellipsis,
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              );
+                                                            }).toList(),
+                                                      ),
+                                            );
+                                          }
+                                          return const SizedBox.shrink();
+                                        },
+                                      ),
+                                      AppSpacing.verticalSpaceMD,
+
+                                      AppSpacing.verticalSpaceSM,
+                                    ],
+                                  );
+                                }
+                                if (accountState is AccountError) {
+                                  return _buildErrorState(accountState.message);
+                                }
+                                return const SizedBox.shrink();
+                              },
+                            ),
+                            const SizedBox(height: AppSpacing.xxxl),
+                          ]),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+              floatingActionButton: _buildFAB(context),
+            ),
           ),
-          floatingActionButton: _buildFAB(context),
-        ),
-      ),
-    );
+        );
       },
     );
   }
@@ -310,10 +353,11 @@ class _HomePageState extends State<HomePage> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => BlocProvider(
-                  create: (_) => sl<FilterBloc>(),
-                  child: const SearchExpensesPage(),
-                ),
+                builder:
+                    (_) => BlocProvider(
+                      create: (_) => sl<FilterBloc>(),
+                      child: const SearchExpensesPage(),
+                    ),
               ),
             );
           },
@@ -444,13 +488,17 @@ class _HomePageState extends State<HomePage> {
         ),
       ],
       flexibleSpace: FlexibleSpaceBar(
-        centerTitle: true,
-        titlePadding: const EdgeInsets.only(bottom: AppSpacing.md),
-        title: DateFilterSelector(
-          selectedDate: _selectedDate,
-          onTap: _selectDate,
-          isScrolled: _isScrolled,
+        centerTitle: false,
+        titlePadding: const EdgeInsets.only(
+          bottom: AppSpacing.md,
+          left: AppSpacing.md,
         ),
+        title: Text("Inicio", style: Theme.of(context).textTheme.titleLarge),
+        // DateFilterSelector(
+        //   selectedDate: _selectedDate,
+        //   onTap: _selectDate,
+        //   isScrolled: _isScrolled,
+        // ),
         background: Container(
           decoration: BoxDecoration(
             gradient: _isScrolled ? null : AppColors.primaryGradient.scale(0.1),
@@ -473,6 +521,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildFAB(BuildContext context) {
     return FloatingActionButton.extended(
+      heroTag: 'home_fab',
       onPressed: _navigateToAddExpense,
       icon: const Icon(Icons.add),
       label: Text(_isScrolled ? '' : 'Agregar Gasto'),

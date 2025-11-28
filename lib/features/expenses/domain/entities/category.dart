@@ -77,7 +77,7 @@ class CategoryHelper {
   static const ExpenseCategory other = ExpenseCategory(
     id: 'other',
     name: 'Otros',
-    icon: Icons.more_horiz,
+    icon: Icons.layers_outlined,
     color: AppColors.categoryOther,
   );
 

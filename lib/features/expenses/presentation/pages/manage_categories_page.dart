@@ -203,6 +203,7 @@ class ManageCategoriesPage extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'manage_categories_fab',
         onPressed: () async {
           final result = await Navigator.push<bool>(
             context,

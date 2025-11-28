@@ -1,5 +1,6 @@
 import 'package:dayli_expenses/features/accounts/domain/entities/account.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../domain/entities/expense.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -32,50 +33,51 @@ class ExpenseSummaryCard extends StatelessWidget {
 
     return GradientCard(
       gradient: AppColors.primaryGradient,
-      margin: const EdgeInsets.all(AppSpacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      
+      child: Row(
         children: [
-          Text(
-            'Balance Actual',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.white.withOpacity(0.9),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Balance Actual',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Colors.white.withOpacity(0.9),
+                  ),
                 ),
-          ),
-          AppSpacing.verticalSpaceSM,
-          Text(
-            DateFormatter.formatCurrency(totalAmount),
-            style: AppTypography.currencyLarge.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
+                AppSpacing.verticalSpaceSM,
+                Text(
+                  DateFormatter.formatCurrency(totalAmount),
+                  style: AppTypography.currencyLarge.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 12.sp,
+                  ),
+                ),
+                AppSpacing.verticalSpaceLG,
+                Container(height: 1, color: Colors.white.withOpacity(0.2)),
+                AppSpacing.verticalSpaceMD,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildStatItem(context, 'Cuentas', accountCount.toString()),
+                    Container(
+                      width: 1,
+                      height: 40,
+                      color: Colors.white.withOpacity(0.2),
+                    ),
+                    _buildStatItem(
+                      context,
+                      'Promedio',
+                      DateFormatter.formatCurrency(averageBalance),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-          AppSpacing.verticalSpaceLG,
-          Container(
-            height: 1,
-            color: Colors.white.withOpacity(0.2),
-          ),
-          AppSpacing.verticalSpaceMD,
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildStatItem(
-                context,
-                'Cuentas',
-                accountCount.toString(),
-              ),
-              Container(
-                width: 1,
-                height: 40,
-                color: Colors.white.withOpacity(0.2),
-              ),
-              _buildStatItem(
-                context,
-                'Promedio',
-                DateFormatter.formatCurrency(averageBalance),
-              ),
-            ],
-          ),
+         
         ],
       ),
     );

@@ -19,47 +19,18 @@ class CategoryChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: AppSpacing.borderRadiusMD,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
-          ),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? category.color
-                : category.color.withOpacity(0.15),
-            borderRadius: AppSpacing.borderRadiusMD,
-            border: Border.all(
-              color: isSelected
-                  ? category.color
-                  : category.color.withOpacity(0.3),
-              width: isSelected ? 2 : 1,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                category.icon,
-                size: AppSpacing.iconSM,
-                color: isSelected ? Colors.white : category.color,
-              ),
-              AppSpacing.horizontalSpaceSM,
-              Text(
-                category.name,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: isSelected ? Colors.white : category.color,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                    ),
-              ),
-            ],
-          ),
+    return ListTile(
+      leading: Icon(
+        category.icon,
+        size: AppSpacing.iconSM,
+        color: category.color,
+      ),
+
+      title: Text(
+        category.name,
+        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+          color: category.color,
+          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
         ),
       ),
     );
@@ -104,16 +75,47 @@ class CategorySelector extends StatelessWidget {
           categories = CategoryHelper.allCategories;
         }
 
-        return Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          children: categories.map((category) {
-            return CategoryChip(
-              category: category,
-              isSelected: selectedCategory?.id == category.id,
-              onTap: () => onCategorySelected?.call(category),
-            );
-          }).toList(),
+        return Container(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Categoría', style: Theme.of(context).textTheme.titleMedium),
+              AppSpacing.verticalSpaceSM,
+              SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: Column(
+                  children:
+                      categories.map((category) {
+                        final isSelected = selectedCategory?.id == category.id;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: AppSpacing.sm),
+                          child: CategoryChip(
+                            category: category,
+                            isSelected: isSelected,
+                            onTap: () {
+                              if (onCategorySelected != null) {
+                                onCategorySelected!(category);
+                              }
+                            },
+                          ),
+                        );
+                      }).toList(),
+                ),
+              ),
+              AppSpacing.verticalSpaceSM,
+              Container(
+                child: TextButton.icon(
+                  onPressed: () {
+                    // Navegar a la página de gestión de categorías
+                    Navigator.pushNamed(context, '/manage_categories');
+                  },
+                  icon: const Icon(Icons.edit),
+                  label: const Text('Gestionar Categorías'),
+                ),
+              ),
+            ],
+          ),
         );
       },
     );

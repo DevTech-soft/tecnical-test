@@ -89,6 +89,7 @@ class _RecurringExpensesView extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'recurring_expenses_fab',
         onPressed: () => _navigateToAdd(context),
         icon: const Icon(Icons.add),
         label: const Text('Nuevo Recurrente'),

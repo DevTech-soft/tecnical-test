@@ -202,6 +202,7 @@ class _SearchExpensesPageState extends State<SearchExpensesPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'search_expenses_fab',
         onPressed: () => _showFilterBottomSheet(context),
         icon: const Icon(Icons.filter_list),
         label: const Text('Filtros'),

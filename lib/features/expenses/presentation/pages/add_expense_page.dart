@@ -1,3 +1,4 @@
+import 'package:dayli_expenses/features/expenses/presentation/blocs/category_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
@@ -22,7 +23,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
-  ExpenseCategory _selectedCategory = CategoryHelper.food;
+  ExpenseCategory? _selectedCategory;
   DateTime _selectedDate = DateTime.now();
   Account? _selectedAccount;
 
@@ -46,12 +47,22 @@ class _AddExpensePageState extends State<AddExpensePage> {
       return;
     }
 
+    if (_selectedCategory == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor selecciona una categoría'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
     final id = const Uuid().v4();
     final amount = double.tryParse(_amountController.text) ?? 0.0;
     final expense = Expense(
       id: id,
       amount: amount,
-      categoryId: _selectedCategory.id,
+      categoryId: _selectedCategory!.id,
       accountId: _selectedAccount!.id,
       note: _noteController.text.isEmpty ? null : _noteController.text,
       date: _selectedDate,
@@ -139,45 +150,49 @@ class _AddExpensePageState extends State<AddExpensePage> {
                     Text(
                       'Monto',
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     AppSpacing.verticalSpaceSM,
                     Row(
                       children: [
                         Text(
                           '\$',
-                          style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                                color: isDark
+                          style: Theme.of(
+                            context,
+                          ).textTheme.displayMedium?.copyWith(
+                            color:
+                                isDark
                                     ? AppColors.textPrimaryDark
                                     : AppColors.textPrimaryLight,
-                                fontWeight: FontWeight.w700,
-                              ),
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                         AppSpacing.horizontalSpaceSM,
                         Expanded(
                           child: TextFormField(
                             controller: _amountController,
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                ),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            style: Theme.of(context).textTheme.displayMedium
+                                ?.copyWith(fontWeight: FontWeight.w700),
                             decoration: InputDecoration(
                               hintText: '0.00',
                               border: InputBorder.none,
                               enabledBorder: InputBorder.none,
                               focusedBorder: InputBorder.none,
                               filled: false,
-                              hintStyle: Theme.of(context)
-                                  .textTheme
-                                  .displayMedium
-                                  ?.copyWith(
-                                    color: isDark
+                              hintStyle: Theme.of(
+                                context,
+                              ).textTheme.displayMedium?.copyWith(
+                                color:
+                                    isDark
                                         ? AppColors.textDisabledDark
                                         : AppColors.textDisabledLight,
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                             validator: (v) {
                               if (v == null || v.isEmpty) {
@@ -202,28 +217,50 @@ class _AddExpensePageState extends State<AddExpensePage> {
               // Category Selection
               Text(
                 'Categoría',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
               ),
-              AppSpacing.verticalSpaceMD,
-              CategorySelector(
-                selectedCategory: _selectedCategory,
-                onCategorySelected: (category) {
-                  setState(() {
-                    _selectedCategory = category;
-                  });
+              ChoiceChip(
+                label: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(_selectedCategory?.icon ?? Icons.layers_outlined),
+                    const SizedBox(width: 4),
+                    Text(_selectedCategory?.name ?? 'Selecciona una categoría'),
+                  ],
+                ),
+                selected: _selectedCategory != null,
+                onSelected: (value) {
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (modalContext) {
+                      return BlocProvider.value(
+                        value: context.read<CategoryBloc>(),
+                        child: CategorySelector(
+                          selectedCategory: _selectedCategory,
+                          onCategorySelected: (category) {
+                            setState(() {
+                              _selectedCategory = category;
+                            });
+                            Navigator.pop(modalContext);
+                          },
+                        ),
+                      );
+                    },
+                  );
                 },
               ),
+            
 
               AppSpacing.verticalSpaceXL,
 
               // Account Selection
               Text(
                 'Cuenta',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
               ),
               AppSpacing.verticalSpaceMD,
               BlocBuilder<AccountBloc, AccountState>(
@@ -257,30 +294,38 @@ class _AddExpensePageState extends State<AddExpensePage> {
                     return Wrap(
                       spacing: AppSpacing.sm,
                       runSpacing: AppSpacing.sm,
-                      children: accounts.map((account) {
-                        final isSelected = _selectedAccount?.id == account.id;
-                        return ChoiceChip(
-                          label: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(account.icon),
-                              const SizedBox(width: 4),
-                              Text(account.name),
-                            ],
-                          ),
-                          selected: isSelected,
-                          onSelected: (selected) {
-                            setState(() {
-                              _selectedAccount = selected ? account : null;
-                            });
-                          },
-                          selectedColor: AppColors.primary.withOpacity(0.2),
-                          backgroundColor: isDark ? AppColors.cardDark : AppColors.cardLight,
-                          side: BorderSide(
-                            color: isSelected ? AppColors.primary : AppColors.grey300,
-                          ),
-                        );
-                      }).toList(),
+                      children:
+                          accounts.map((account) {
+                            final isSelected =
+                                _selectedAccount?.id == account.id;
+                            return ChoiceChip(
+                              label: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(account.icon),
+                                  const SizedBox(width: 4),
+                                  Text(account.name),
+                                ],
+                              ),
+                              selected: isSelected,
+                              onSelected: (selected) {
+                                setState(() {
+                                  _selectedAccount = selected ? account : null;
+                                });
+                              },
+                              selectedColor: AppColors.primary.withOpacity(0.2),
+                              backgroundColor:
+                                  isDark
+                                      ? AppColors.cardDark
+                                      : AppColors.cardLight,
+                              side: BorderSide(
+                                color:
+                                    isSelected
+                                        ? AppColors.primary
+                                        : AppColors.grey300,
+                              ),
+                            );
+                          }).toList(),
                     );
                   }
                   return const SizedBox.shrink();
@@ -292,9 +337,9 @@ class _AddExpensePageState extends State<AddExpensePage> {
               // Date Selection
               Text(
                 'Fecha y Hora',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
               ),
               AppSpacing.verticalSpaceMD,
               InkWell(
@@ -326,9 +371,10 @@ class _AddExpensePageState extends State<AddExpensePage> {
                       Icon(
                         Icons.arrow_forward_ios,
                         size: AppSpacing.iconSM,
-                        color: isDark
-                            ? AppColors.textSecondaryDark
-                            : AppColors.textSecondaryLight,
+                        color:
+                            isDark
+                                ? AppColors.textSecondaryDark
+                                : AppColors.textSecondaryLight,
                       ),
                     ],
                   ),
@@ -340,9 +386,9 @@ class _AddExpensePageState extends State<AddExpensePage> {
               // Note Input
               Text(
                 'Nota (opcional)',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
               ),
               AppSpacing.verticalSpaceMD,
               TextFormField(
@@ -350,10 +396,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
                 maxLines: 3,
                 decoration: InputDecoration(
                   hintText: 'Agrega una descripción...',
-                  prefixIcon: Icon(
-                    Icons.notes,
-                    color: AppColors.primary,
-                  ),
+                  prefixIcon: Icon(Icons.notes, color: AppColors.primary),
                 ),
               ),
 
@@ -367,7 +410,9 @@ class _AddExpensePageState extends State<AddExpensePage> {
                   icon: const Icon(Icons.check),
                   label: const Text('Guardar Gasto'),
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.md,
+                    ),
                   ),
                 ),
               ),
@@ -379,6 +424,8 @@ class _AddExpensePageState extends State<AddExpensePage> {
       ),
     );
   }
+
+  void _showCategorySelector() {}
 }
 
 // Extension to scale gradient opacity
