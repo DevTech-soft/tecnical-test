@@ -7,6 +7,9 @@ import '../../domain/entities/frequency_type.dart';
 import '../../domain/entities/recurring_expense.dart';
 import '../blocs/recurring_expenses_bloc.dart';
 import '../blocs/recurring_expenses_event.dart';
+import '../../../accounts/presentation/bloc/account_bloc.dart';
+import '../../../accounts/presentation/bloc/account_state.dart';
+import '../../../accounts/domain/entities/account.dart';
 
 class EditRecurringExpensePage extends StatefulWidget {
   final RecurringExpense recurringExpense;
@@ -30,6 +33,7 @@ class _EditRecurringExpensePageState extends State<EditRecurringExpensePage> {
   late DateTime _startDate;
   DateTime? _endDate;
   late bool _hasEndDate;
+  Account? _selectedAccount;
 
   @override
   void initState() {
@@ -45,6 +49,14 @@ class _EditRecurringExpensePageState extends State<EditRecurringExpensePage> {
     _startDate = widget.recurringExpense.startDate;
     _endDate = widget.recurringExpense.endDate;
     _hasEndDate = widget.recurringExpense.endDate != null;
+
+    // Get the selected account from AccountBloc
+    final accountState = context.read<AccountBloc>().state;
+    if (accountState is AccountLoaded) {
+      _selectedAccount = accountState.accounts
+          .firstWhere((acc) => acc.id == widget.recurringExpense.accountId,
+              orElse: () => accountState.accounts.first);
+    }
   }
 
   @override
@@ -78,6 +90,10 @@ class _EditRecurringExpensePageState extends State<EditRecurringExpensePage> {
 
             // Monto
             _buildAmountSection(),
+            const SizedBox(height: 24),
+
+            // Cuenta
+            _buildAccountSection(),
             const SizedBox(height: 24),
 
             // Frecuencia
@@ -444,6 +460,82 @@ class _EditRecurringExpensePageState extends State<EditRecurringExpensePage> {
     );
   }
 
+  Widget _buildAccountSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Cuenta',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        const SizedBox(height: 12),
+        BlocBuilder<AccountBloc, AccountState>(
+          builder: (context, state) {
+            if (state is AccountLoaded) {
+              final accounts = state.accounts;
+
+              if (accounts.isEmpty) {
+                return Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.warning.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.warning),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.warning, color: AppColors.warning),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'No tienes cuentas. Crea una primero.',
+                          style: TextStyle(color: AppColors.warning),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              return Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: accounts.map((account) {
+                  final isSelected = _selectedAccount?.id == account.id;
+                  return ChoiceChip(
+                    label: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(account.icon),
+                        const SizedBox(width: 6),
+                        Text(account.name),
+                      ],
+                    ),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      setState(() {
+                        _selectedAccount = selected ? account : null;
+                      });
+                    },
+                    selectedColor: AppColors.primary.withOpacity(0.2),
+                    backgroundColor: Colors.white,
+                    side: BorderSide(
+                      color: isSelected ? AppColors.primary : Colors.grey.shade300,
+                      width: isSelected ? 2 : 1,
+                    ),
+                  );
+                }).toList(),
+              );
+            }
+            return const SizedBox.shrink();
+          },
+        ),
+      ],
+    );
+  }
+
   Widget _buildActionButtons() {
     return Row(
       children: [
@@ -515,6 +607,17 @@ class _EditRecurringExpensePageState extends State<EditRecurringExpensePage> {
       return;
     }
 
+    // Validar cuenta seleccionada
+    if (_selectedAccount == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor selecciona una cuenta'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     // Validar fecha de fin
     if (_hasEndDate && _endDate != null && _endDate!.isBefore(_startDate)) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -532,6 +635,7 @@ class _EditRecurringExpensePageState extends State<EditRecurringExpensePage> {
     final updatedRecurringExpense = widget.recurringExpense.copyWith(
       amount: amount,
       categoryId: _selectedCategory.id,
+      accountId: _selectedAccount!.id,
       note: note,
       frequency: _selectedFrequency,
       startDate: _startDate,

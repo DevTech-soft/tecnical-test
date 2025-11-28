@@ -15,6 +15,9 @@ class RecurringExpense extends Equatable {
   /// ID de la categoría
   final String categoryId;
 
+  /// ID de la cuenta de la cual se descontará el gasto
+  final String accountId;
+
   /// Nota o descripción (opcional)
   final String? note;
 
@@ -45,6 +48,7 @@ class RecurringExpense extends Equatable {
     required this.id,
     required this.amount,
     required this.categoryId,
+    required this.accountId,
     this.note,
     required this.frequency,
     required this.startDate,
@@ -103,6 +107,7 @@ class RecurringExpense extends Equatable {
     String? id,
     double? amount,
     String? categoryId,
+    String? accountId,
     String? note,
     FrequencyType? frequency,
     DateTime? startDate,
@@ -119,6 +124,7 @@ class RecurringExpense extends Equatable {
       id: id ?? this.id,
       amount: amount ?? this.amount,
       categoryId: categoryId ?? this.categoryId,
+      accountId: accountId ?? this.accountId,
       note: clearNote ? null : note ?? this.note,
       frequency: frequency ?? this.frequency,
       startDate: startDate ?? this.startDate,
@@ -135,6 +141,7 @@ class RecurringExpense extends Equatable {
         id,
         amount,
         categoryId,
+        accountId,
         note,
         frequency,
         startDate,

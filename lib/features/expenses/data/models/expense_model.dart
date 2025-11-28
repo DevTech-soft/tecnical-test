@@ -20,12 +20,16 @@ class ExpenseModel extends HiveObject {
   @HiveField(4)
   DateTime date;
 
+  @HiveField(5)
+  String accountId;
+
   ExpenseModel({
     required this.id,
     required this.amount,
     required this.categoryId,
     this.note,
     required this.date,
+    required this.accountId,
   });
 
   factory ExpenseModel.fromEntity(Expense e) => ExpenseModel(
@@ -34,6 +38,7 @@ class ExpenseModel extends HiveObject {
     categoryId: e.categoryId,
     note: e.note,
     date: e.date,
+    accountId: e.accountId,
   );
 
   factory ExpenseModel.fromJson(Map<String, dynamic> json) => ExpenseModel(
@@ -42,6 +47,7 @@ class ExpenseModel extends HiveObject {
     categoryId: json['categoryId'] as String,
     note: json['note'] as String?,
     date: DateTime.parse(json['date'] as String),
+    accountId: json['accountId'] as String,
   );
 
   Map<String, dynamic> toJson() => {
@@ -50,6 +56,7 @@ class ExpenseModel extends HiveObject {
     'categoryId': categoryId,
     'note': note,
     'date': date.toIso8601String(),
+    'accountId': accountId,
   };
 
   Expense toEntity() => Expense(
@@ -58,5 +65,6 @@ class ExpenseModel extends HiveObject {
     categoryId: categoryId,
     note: note,
     date: date,
+    accountId: accountId,
   );
 }

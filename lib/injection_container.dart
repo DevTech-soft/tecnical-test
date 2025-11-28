@@ -62,6 +62,18 @@ import 'features/export/domain/usecases/export_expenses_pdf.dart';
 import 'features/export/domain/usecases/import_expenses_csv.dart';
 import 'features/export/domain/usecases/share_export.dart';
 import 'features/export/presentation/bloc/export_bloc.dart';
+import 'features/accounts/data/datasources/account_local_datasource.dart';
+import 'features/accounts/data/datasources/account_remote_datasource.dart';
+import 'features/accounts/data/repositories/account_repository_impl.dart';
+import 'features/accounts/domain/repositories/account_repository.dart';
+import 'features/accounts/domain/usecases/create_account.dart';
+import 'features/accounts/domain/usecases/get_all_accounts.dart';
+import 'features/accounts/domain/usecases/get_account_by_id.dart';
+import 'features/accounts/domain/usecases/update_account.dart';
+import 'features/accounts/domain/usecases/delete_account.dart';
+import 'features/accounts/domain/usecases/watch_accounts.dart';
+import 'features/accounts/presentation/bloc/account_bloc.dart';
+import 'features/accounts/data/models/account_model.dart';
 
 
 final sl = GetIt.instance;
@@ -74,6 +86,7 @@ Future<void> init(
   Box<BudgetModel> budgetBox,
   Box<RecurringExpenseModel> recurringExpenseBox,
   Box<CategoryModel> categoryBox,
+  Box<AccountModel> accountBox,
 ) async {
 // external - UUID
 sl.registerLazySingleton(() => const Uuid());
@@ -97,6 +110,10 @@ sl.registerLazySingleton<CategoryRemoteDataSource>(
 // datasources - Budget
 sl.registerLazySingleton<BudgetLocalDataSource>(() => BudgetLocalDataSourceImpl(budgetBox: budgetBox));
 sl.registerLazySingleton<BudgetRemoteDataSource>(() => BudgetRemoteDataSourceImpl());
+
+// datasources - Accounts
+sl.registerLazySingleton<AccountLocalDataSource>(() => AccountLocalDataSourceImpl(accountBox));
+sl.registerLazySingleton<AccountRemoteDataSource>(() => AccountRemoteDataSourceImpl());
 
 
 // repositories - Expenses
@@ -127,6 +144,15 @@ sl.registerLazySingleton<CategoryRepository>(
   () => CategoryRepositoryImpl(
     localDataSource: sl(),
     remoteDataSource: sl(),
+    authRepository: sl(),
+  ),
+);
+
+// repositories - Accounts
+sl.registerLazySingleton<AccountRepository>(
+  () => AccountRepositoryImpl(
+    local: sl(),
+    remote: sl(),
     authRepository: sl(),
   ),
 );
@@ -162,6 +188,14 @@ sl.registerLazySingleton(() => CreateCategory(sl(), sl()));
 sl.registerLazySingleton(() => UpdateCategory(sl()));
 sl.registerLazySingleton(() => DeleteCategory(sl()));
 sl.registerLazySingleton(() => InitializeDefaultCategories(sl()));
+
+// usecases - Accounts
+sl.registerLazySingleton(() => CreateAccount(sl()));
+sl.registerLazySingleton(() => GetAllAccounts(sl()));
+sl.registerLazySingleton(() => GetAccountById(sl()));
+sl.registerLazySingleton(() => UpdateAccount(sl()));
+sl.registerLazySingleton(() => DeleteAccount(sl()));
+sl.registerLazySingleton(() => WatchAccounts(sl()));
 
 
 // blocs - Expenses
@@ -232,5 +266,14 @@ sl.registerFactory(() => AuthBloc(
   signUpWithEmail: sl(),
   signInWithGoogle: sl(),
   signOut: sl(),
+));
+
+// blocs - Accounts
+sl.registerFactory(() => AccountBloc(
+  createAccount: sl(),
+  getAllAccounts: sl(),
+  getAccountById: sl(),
+  updateAccount: sl(),
+  deleteAccount: sl(),
 ));
 }

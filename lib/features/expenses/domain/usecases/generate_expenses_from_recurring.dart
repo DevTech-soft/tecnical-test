@@ -84,6 +84,7 @@ class GenerateExpensesFromRecurring implements UseCase<int, NoParams> {
       id: _uuid.v4(),
       amount: recurring.amount,
       categoryId: recurring.categoryId,
+      accountId: recurring.accountId,
       note: recurring.note,
       date: DateTime.now(),
     );

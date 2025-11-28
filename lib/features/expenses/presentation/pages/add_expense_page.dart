@@ -8,6 +8,9 @@ import '../widgets/category_chip.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/date_formatter.dart';
+import '../../../accounts/presentation/bloc/account_bloc.dart';
+import '../../../accounts/presentation/bloc/account_state.dart';
+import '../../../accounts/domain/entities/account.dart';
 
 class AddExpensePage extends StatefulWidget {
   const AddExpensePage({super.key});
@@ -21,6 +24,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
   final _noteController = TextEditingController();
   ExpenseCategory _selectedCategory = CategoryHelper.food;
   DateTime _selectedDate = DateTime.now();
+  Account? _selectedAccount;
 
   @override
   void dispose() {
@@ -32,12 +36,23 @@ class _AddExpensePageState extends State<AddExpensePage> {
   void _save() {
     if (!_formKey.currentState!.validate()) return;
 
+    if (_selectedAccount == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor selecciona una cuenta'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
     final id = const Uuid().v4();
     final amount = double.tryParse(_amountController.text) ?? 0.0;
     final expense = Expense(
       id: id,
       amount: amount,
       categoryId: _selectedCategory.id,
+      accountId: _selectedAccount!.id,
       note: _noteController.text.isEmpty ? null : _noteController.text,
       date: _selectedDate,
     );
@@ -198,6 +213,77 @@ class _AddExpensePageState extends State<AddExpensePage> {
                   setState(() {
                     _selectedCategory = category;
                   });
+                },
+              ),
+
+              AppSpacing.verticalSpaceXL,
+
+              // Account Selection
+              Text(
+                'Cuenta',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+              AppSpacing.verticalSpaceMD,
+              BlocBuilder<AccountBloc, AccountState>(
+                builder: (context, state) {
+                  if (state is AccountLoaded) {
+                    final accounts = state.accounts;
+
+                    if (accounts.isEmpty) {
+                      return Container(
+                        padding: AppSpacing.paddingMD,
+                        decoration: BoxDecoration(
+                          color: AppColors.warning.withOpacity(0.1),
+                          borderRadius: AppSpacing.borderRadiusMD,
+                          border: Border.all(color: AppColors.warning),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.warning, color: AppColors.warning),
+                            AppSpacing.horizontalSpaceSM,
+                            Expanded(
+                              child: Text(
+                                'No tienes cuentas. Crea una primero.',
+                                style: TextStyle(color: AppColors.warning),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
+                    return Wrap(
+                      spacing: AppSpacing.sm,
+                      runSpacing: AppSpacing.sm,
+                      children: accounts.map((account) {
+                        final isSelected = _selectedAccount?.id == account.id;
+                        return ChoiceChip(
+                          label: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(account.icon),
+                              const SizedBox(width: 4),
+                              Text(account.name),
+                            ],
+                          ),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            setState(() {
+                              _selectedAccount = selected ? account : null;
+                            });
+                          },
+                          selectedColor: AppColors.primary.withOpacity(0.2),
+                          backgroundColor: isDark ? AppColors.cardDark : AppColors.cardLight,
+                          side: BorderSide(
+                            color: isSelected ? AppColors.primary : AppColors.grey300,
+                          ),
+                        );
+                      }).toList(),
+                    );
+                  }
+                  return const SizedBox.shrink();
                 },
               ),
 

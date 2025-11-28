@@ -1,3 +1,4 @@
+import 'package:dayli_expenses/features/accounts/domain/entities/account.dart';
 import 'package:flutter/material.dart';
 import '../../domain/entities/expense.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -7,22 +8,22 @@ import '../../../../core/utils/date_formatter.dart';
 import '../../../../core/widgets/custom_card.dart';
 
 class ExpenseSummaryCard extends StatelessWidget {
-  final List<Expense> expenses;
+  final List<Account> accounts;
 
   const ExpenseSummaryCard({
     super.key,
-    required this.expenses,
+    required this.accounts,
   });
 
   double get totalAmount {
-    return expenses.fold(0, (sum, expense) => sum + expense.amount);
+    return accounts.fold(0, (sum, account) => sum + account.balance);
   }
 
-  int get expenseCount => expenses.length;
+  int get accountCount => accounts.length;
 
-  double get averageExpense {
-    if (expenses.isEmpty) return 0;
-    return totalAmount / expenseCount;
+  double get averageBalance {
+    if (accounts.isEmpty) return 0;
+    return totalAmount / accountCount;
   }
 
   @override
@@ -36,7 +37,7 @@ class ExpenseSummaryCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Balance Total',
+            'Balance Actual',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: Colors.white.withOpacity(0.9),
                 ),
@@ -60,8 +61,8 @@ class ExpenseSummaryCard extends StatelessWidget {
             children: [
               _buildStatItem(
                 context,
-                'Gastos',
-                expenseCount.toString(),
+                'Cuentas',
+                accountCount.toString(),
               ),
               Container(
                 width: 1,
@@ -71,7 +72,7 @@ class ExpenseSummaryCard extends StatelessWidget {
               _buildStatItem(
                 context,
                 'Promedio',
-                DateFormatter.formatCurrency(averageExpense),
+                DateFormatter.formatCurrency(averageBalance),
               ),
             ],
           ),

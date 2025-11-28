@@ -13,6 +13,7 @@ import 'features/expenses/data/models/expense_model.dart';
 import 'features/expenses/data/models/recurring_expense_model.dart';
 import 'features/expenses/data/models/category_model.dart';
 import 'features/budget/data/models/budget_model.dart';
+import 'features/accounts/data/models/account_model.dart';
 import 'core/theme/app_theme.dart';
 import 'features/expenses/presentation/blocs/category_bloc.dart';
 import 'features/expenses/presentation/blocs/category_event.dart';
@@ -32,14 +33,16 @@ void main() async {
   Hive.registerAdapter(BudgetModelAdapter());
   Hive.registerAdapter(RecurringExpenseModelAdapter());
   Hive.registerAdapter(CategoryModelAdapter());
+  Hive.registerAdapter(AccountModelAdapter());
 
   final expenseBox = await Hive.openBox<ExpenseModel>('expensesBox');
   final budgetBox = await Hive.openBox<BudgetModel>('budgetsBox');
   final recurringExpenseBox = await Hive.openBox<RecurringExpenseModel>('recurringExpensesBox');
   final categoryBox = await Hive.openBox<CategoryModel>('categoriesBox');
+  final accountBox = await Hive.openBox<AccountModel>('accountsBox');
 
   // Initialize dependency injection
-  await di.init(expenseBox, budgetBox, recurringExpenseBox, categoryBox);
+  await di.init(expenseBox, budgetBox, recurringExpenseBox, categoryBox, accountBox);
 
   // Initialize default categories if needed
   final categoryBloc = di.getIt<CategoryBloc>();

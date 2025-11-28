@@ -4,6 +4,7 @@ class Expense extends Equatable {
   final String id;
   final double amount;
   final String categoryId;
+  final String accountId;
   final String? note;
   final DateTime date;
 
@@ -11,10 +12,11 @@ class Expense extends Equatable {
     required this.id,
     required this.amount,
     required this.categoryId,
+    required this.accountId,
     this.note,
     required this.date,
   });
 
   @override
-  List<Object?> get props => [id, amount, categoryId, note, date];
+  List<Object?> get props => [id, amount, categoryId, accountId, note, date];
 }

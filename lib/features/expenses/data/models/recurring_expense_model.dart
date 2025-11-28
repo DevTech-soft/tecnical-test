@@ -39,6 +39,9 @@ class RecurringExpenseModel extends HiveObject {
   @HiveField(10)
   final DateTime updatedAt;
 
+  @HiveField(11)
+  final String accountId;
+
   RecurringExpenseModel({
     required this.id,
     required this.amount,
@@ -51,6 +54,7 @@ class RecurringExpenseModel extends HiveObject {
     required this.isActive,
     required this.createdAt,
     required this.updatedAt,
+    required this.accountId,
   });
 
   /// Convierte el modelo a entidad de dominio
@@ -59,6 +63,7 @@ class RecurringExpenseModel extends HiveObject {
       id: id,
       amount: amount,
       categoryId: categoryId,
+      accountId: accountId,
       note: note,
       frequency: _frequencyTypeFromString(frequency),
       startDate: startDate,
@@ -76,6 +81,7 @@ class RecurringExpenseModel extends HiveObject {
       id: entity.id,
       amount: entity.amount,
       categoryId: entity.categoryId,
+      accountId: entity.accountId,
       note: entity.note,
       frequency: _frequencyTypeToString(entity.frequency),
       startDate: entity.startDate,
@@ -106,6 +112,7 @@ class RecurringExpenseModel extends HiveObject {
       'id': id,
       'amount': amount,
       'categoryId': categoryId,
+      'accountId': accountId,
       'note': note,
       'frequency': frequency,
       'startDate': startDate.toIso8601String(),
@@ -123,6 +130,7 @@ class RecurringExpenseModel extends HiveObject {
       id: json['id'] as String,
       amount: (json['amount'] as num).toDouble(),
       categoryId: json['categoryId'] as String,
+      accountId: json['accountId'] as String,
       note: json['note'] as String?,
       frequency: json['frequency'] as String,
       startDate: DateTime.parse(json['startDate'] as String),

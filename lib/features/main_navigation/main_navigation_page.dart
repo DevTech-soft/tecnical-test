@@ -10,6 +10,8 @@ import '../../injection_container.dart';
 import '../expenses/domain/usecases/generate_expenses_from_recurring.dart';
 import '../expenses/presentation/blocs/category_bloc.dart';
 import '../expenses/presentation/blocs/category_event.dart';
+import '../accounts/presentation/bloc/account_bloc.dart';
+import '../accounts/presentation/bloc/account_event.dart';
 import '../../core/utils/app_logger.dart';
 
 class MainNavigationPage extends StatelessWidget {
@@ -17,8 +19,15 @@ class MainNavigationPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => sl<CategoryBloc>()..add(const LoadCategories()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => sl<CategoryBloc>()..add(const LoadCategories()),
+        ),
+        BlocProvider(
+          create: (context) => sl<AccountBloc>()..add(LoadAccounts()),
+        ),
+      ],
       child: const _MainNavigationPageContent(),
     );
   }

@@ -7,6 +7,9 @@ import '../widgets/category_chip.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/date_formatter.dart';
+import '../../../accounts/presentation/bloc/account_bloc.dart';
+import '../../../accounts/presentation/bloc/account_state.dart';
+import '../../../accounts/domain/entities/account.dart';
 
 class EditExpensePage extends StatefulWidget {
   final Expense expense;
@@ -26,6 +29,7 @@ class _EditExpensePageState extends State<EditExpensePage> {
   late TextEditingController _noteController;
   late ExpenseCategory _selectedCategory;
   late DateTime _selectedDate;
+  Account? _selectedAccount;
 
   @override
   void initState() {
@@ -38,6 +42,14 @@ class _EditExpensePageState extends State<EditExpensePage> {
     );
     _selectedCategory = CategoryHelper.getCategoryById(widget.expense.categoryId);
     _selectedDate = widget.expense.date;
+
+    // Get the selected account from AccountBloc
+    final accountState = context.read<AccountBloc>().state;
+    if (accountState is AccountLoaded) {
+      _selectedAccount = accountState.accounts
+          .firstWhere((acc) => acc.id == widget.expense.accountId,
+              orElse: () => accountState.accounts.first);
+    }
   }
 
   @override
@@ -50,11 +62,22 @@ class _EditExpensePageState extends State<EditExpensePage> {
   void _save() {
     if (!_formKey.currentState!.validate()) return;
 
+    if (_selectedAccount == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor selecciona una cuenta'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
     final amount = double.tryParse(_amountController.text) ?? 0.0;
     final updatedExpense = Expense(
       id: widget.expense.id, // Keep the same ID
       amount: amount,
       categoryId: _selectedCategory.id,
+      accountId: _selectedAccount!.id,
       note: _noteController.text.isEmpty ? null : _noteController.text,
       date: _selectedDate,
     );
@@ -215,6 +238,54 @@ class _EditExpensePageState extends State<EditExpensePage> {
                   setState(() {
                     _selectedCategory = category;
                   });
+                },
+              ),
+
+              AppSpacing.verticalSpaceXL,
+
+              // Account Selection
+              Text(
+                'Cuenta',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+              AppSpacing.verticalSpaceMD,
+              BlocBuilder<AccountBloc, AccountState>(
+                builder: (context, state) {
+                  if (state is AccountLoaded) {
+                    final accounts = state.accounts;
+
+                    return Wrap(
+                      spacing: AppSpacing.sm,
+                      runSpacing: AppSpacing.sm,
+                      children: accounts.map((account) {
+                        final isSelected = _selectedAccount?.id == account.id;
+                        return ChoiceChip(
+                          label: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(account.icon),
+                              const SizedBox(width: 4),
+                              Text(account.name),
+                            ],
+                          ),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            setState(() {
+                              _selectedAccount = selected ? account : null;
+                            });
+                          },
+                          selectedColor: AppColors.primary.withOpacity(0.2),
+                          backgroundColor: isDark ? AppColors.cardDark : AppColors.cardLight,
+                          side: BorderSide(
+                            color: isSelected ? AppColors.primary : AppColors.grey300,
+                          ),
+                        );
+                      }).toList(),
+                    );
+                  }
+                  return const SizedBox.shrink();
                 },
               ),
 

@@ -1,47 +1,53 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'expense_model.dart';
+part of 'account_model.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class ExpenseModelAdapter extends TypeAdapter<ExpenseModel> {
+class AccountModelAdapter extends TypeAdapter<AccountModel> {
   @override
-  final int typeId = 0;
+  final int typeId = 4;
 
   @override
-  ExpenseModel read(BinaryReader reader) {
+  AccountModel read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return ExpenseModel(
+    return AccountModel(
       id: fields[0] as String,
-      amount: fields[1] as double,
-      categoryId: fields[2] as String,
-      note: fields[3] as String?,
-      date: fields[4] as DateTime,
-      accountId: fields[5] as String,
+      name: fields[1] as String,
+      type: fields[2] as String,
+      description: fields[3] as String?,
+      balance: fields[4] as double,
+      icon: fields[5] as String,
+      createdAt: fields[6] as DateTime,
+      updatedAt: fields[7] as DateTime,
     );
   }
 
   @override
-  void write(BinaryWriter writer, ExpenseModel obj) {
+  void write(BinaryWriter writer, AccountModel obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.amount)
+      ..write(obj.name)
       ..writeByte(2)
-      ..write(obj.categoryId)
+      ..write(obj.type)
       ..writeByte(3)
-      ..write(obj.note)
+      ..write(obj.description)
       ..writeByte(4)
-      ..write(obj.date)
+      ..write(obj.balance)
       ..writeByte(5)
-      ..write(obj.accountId);
+      ..write(obj.icon)
+      ..writeByte(6)
+      ..write(obj.createdAt)
+      ..writeByte(7)
+      ..write(obj.updatedAt);
   }
 
   @override
@@ -50,7 +56,7 @@ class ExpenseModelAdapter extends TypeAdapter<ExpenseModel> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ExpenseModelAdapter &&
+      other is AccountModelAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
