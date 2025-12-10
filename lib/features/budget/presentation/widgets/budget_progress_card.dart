@@ -10,11 +10,8 @@ class BudgetProgressCard extends StatelessWidget {
   final BudgetStatus budgetStatus;
   final VoidCallback? onTap;
 
-  const BudgetProgressCard({
-    Key? key,
-    required this.budgetStatus,
-    this.onTap,
-  }) : super(key: key);
+  const BudgetProgressCard({Key? key, required this.budgetStatus, this.onTap})
+    : super(key: key);
 
   String _formatCurrency(double amount) {
     final formatter = NumberFormat('#,##0', 'es');
@@ -36,18 +33,18 @@ class BudgetProgressCard extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              alertColor.withValues(alpha:0.1),
-              alertColor.withValues(alpha:0.05),
+              alertColor.withValues(alpha: 0.1),
+              alertColor.withValues(alpha: 0.05),
             ],
           ),
           borderRadius: BorderRadius.circular(20.r),
           border: Border.all(
-            color: alertColor.withValues(alpha:0.3),
+            color: alertColor.withValues(alpha: 0.3),
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: alertColor.withValues(alpha:0.1),
+              color: alertColor.withValues(alpha: 0.1),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),
@@ -56,7 +53,6 @@ class BudgetProgressCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header con título y nivel de alerta
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -73,9 +69,10 @@ class BudgetProgressCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
-                        color: isDark
-                            ? AppColors.textPrimaryDark
-                            : AppColors.textPrimaryLight,
+                        color:
+                            isDark
+                                ? AppColors.textPrimaryDark
+                                : AppColors.textPrimaryLight,
                       ),
                     ),
                   ],
@@ -86,31 +83,41 @@ class BudgetProgressCard extends StatelessWidget {
 
             SizedBox(height: AppSpacing.xl.h),
 
-            // Montos - Diseño mejorado
             Column(
               children: [
-                // Gastado y Presupuesto
                 Row(
                   children: [
                     Expanded(
-                      child: _buildAmountCard(
-                        label: 'Gastado',
-                        amount: budgetStatus.spent,
-                        icon: Icons.arrow_upward,
-                        color: alertColor,
-                        isDark: isDark,
+                      child: Text(
+                        'Gastado: ${_formatCurrency(budgetStatus.spent)}',
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.normal,
+                          color:
+                              isDark
+                                  ? AppColors.textPrimaryDark
+                                  : AppColors.textPrimaryLight,
+                        ),
                       ),
+
+                      // _buildAmountCard(
+                      //   label: 'Gastado',
+                      //   amount: budgetStatus.spent,
+                      //   icon: Icons.arrow_upward,
+                      //   color: alertColor,
+                      //   isDark: isDark,
+                      // ),
                     ),
-                    SizedBox(width: AppSpacing.md.w),
-                    Expanded(
-                      child: _buildAmountCard(
-                        label: 'Presupuesto',
-                        amount: budgetStatus.budget.amount,
-                        icon: Icons.account_balance_wallet,
-                        color: AppColors.info,
-                        isDark: isDark,
-                      ),
-                    ),
+                    // SizedBox(width: AppSpacing.md.w),
+                    // Expanded(
+                    //   child: _buildAmountCard(
+                    //     label: 'Presupuesto',
+                    //     amount: budgetStatus.budget.amount,
+                    //     icon: Icons.account_balance_wallet,
+                    //     color: AppColors.info,
+                    //     isDark: isDark,
+                    //   ),
+                    // ),
                   ],
                 ),
                 SizedBox(height: AppSpacing.md.h),
@@ -122,9 +129,10 @@ class BudgetProgressCard extends StatelessWidget {
                       budgetStatus.remaining > 0
                           ? Icons.check_circle_outline
                           : Icons.warning_amber_rounded,
-                  color: budgetStatus.remaining > 0
-                      ? AppColors.success
-                      : AppColors.error,
+                  color:
+                      budgetStatus.remaining > 0
+                          ? AppColors.success
+                          : AppColors.error,
                   isDark: isDark,
                   isFullWidth: true,
                 ),
@@ -152,9 +160,10 @@ class BudgetProgressCard extends StatelessWidget {
                       '${budgetStatus.daysRemaining} días restantes',
                       style: TextStyle(
                         fontSize: 12.sp,
-                        color: isDark
-                            ? AppColors.textSecondaryDark
-                            : AppColors.textSecondaryLight,
+                        color:
+                            isDark
+                                ? AppColors.textSecondaryDark
+                                : AppColors.textSecondaryLight,
                       ),
                     ),
                   ],
@@ -166,9 +175,10 @@ class BudgetProgressCard extends StatelessWidget {
                     height: 12.h,
                     child: LinearProgressIndicator(
                       value: progressPercentage,
-                      backgroundColor: isDark
-                          ? AppColors.grey800.withValues(alpha:0.3)
-                          : AppColors.grey200,
+                      backgroundColor:
+                          isDark
+                              ? AppColors.grey800.withValues(alpha: 0.3)
+                              : AppColors.grey200,
                       valueColor: AlwaysStoppedAnimation<Color>(alertColor),
                     ),
                   ),
@@ -185,11 +195,9 @@ class BudgetProgressCard extends StatelessWidget {
                 vertical: AppSpacing.sm.h,
               ),
               decoration: BoxDecoration(
-                color: alertColor.withValues(alpha:0.1),
+                color: alertColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(
-                  color: alertColor.withValues(alpha:0.2),
-                ),
+                border: Border.all(color: alertColor.withValues(alpha: 0.2)),
               ),
               child: Row(
                 children: [
@@ -355,14 +363,11 @@ class BudgetProgressCard extends StatelessWidget {
   Widget _buildAlertBadge(BudgetAlertLevel level, bool isDark) {
     final color = _getAlertColor(level);
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm.w,
-        vertical: 4.h,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm.w, vertical: 4.h),
       decoration: BoxDecoration(
-        color: color.withValues(alpha:0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: color.withValues(alpha:0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Text(
         level.label,
@@ -384,9 +389,10 @@ class BudgetProgressCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(AppSpacing.sm.w),
       decoration: BoxDecoration(
-        color: isDark
-            ? AppColors.grey800.withValues(alpha:0.3)
-            : AppColors.grey100.withValues(alpha:0.5),
+        color:
+            isDark
+                ? AppColors.grey800.withValues(alpha: 0.3)
+                : AppColors.grey100.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(12.r),
       ),
       child: Column(
@@ -397,9 +403,10 @@ class BudgetProgressCard extends StatelessWidget {
               Icon(
                 icon,
                 size: 14.sp,
-                color: isDark
-                    ? AppColors.textSecondaryDark
-                    : AppColors.textSecondaryLight,
+                color:
+                    isDark
+                        ? AppColors.textSecondaryDark
+                        : AppColors.textSecondaryLight,
               ),
               SizedBox(width: 4.w),
               Expanded(
@@ -407,9 +414,10 @@ class BudgetProgressCard extends StatelessWidget {
                   label,
                   style: TextStyle(
                     fontSize: 10.sp,
-                    color: isDark
-                        ? AppColors.textSecondaryDark
-                        : AppColors.textSecondaryLight,
+                    color:
+                        isDark
+                            ? AppColors.textSecondaryDark
+                            : AppColors.textSecondaryLight,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -423,9 +431,10 @@ class BudgetProgressCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 13.sp,
               fontWeight: FontWeight.bold,
-              color: isDark
-                  ? AppColors.textPrimaryDark
-                  : AppColors.textPrimaryLight,
+              color:
+                  isDark
+                      ? AppColors.textPrimaryDark
+                      : AppColors.textPrimaryLight,
             ),
           ),
         ],

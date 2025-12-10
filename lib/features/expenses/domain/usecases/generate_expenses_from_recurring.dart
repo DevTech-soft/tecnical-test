@@ -3,8 +3,8 @@ import '../../../../core/usecases/usecase.dart';
 import '../../../../core/utils/app_logger.dart';
 import '../entities/expense.dart';
 import '../entities/recurring_expense.dart';
-import '../repositories/expense_repository.dart';
 import '../repositories/recurring_expense_repository.dart';
+import 'add_expense_with_account_update.dart';
 
 /// Use case para generar gastos reales desde gastos recurrentes
 ///
@@ -12,18 +12,19 @@ import '../repositories/recurring_expense_repository.dart';
 /// 1. Obtener gastos recurrentes que deben generar un gasto
 /// 2. Crear el gasto real
 /// 3. Actualizar la fecha de última generación en el recurrente
+/// 4. Actualizar el balance de la cuenta asociada
 ///
 /// Este use case debe ser llamado periódicamente
 /// (por ejemplo, al abrir la app o mediante un servicio en background)
 class GenerateExpensesFromRecurring implements UseCase<int, NoParams> {
   final RecurringExpenseRepository recurringRepository;
-  final ExpenseRepository expenseRepository;
+  final AddExpenseWithAccountUpdate addExpenseWithAccountUpdate;
   final _logger = AppLogger('GenerateExpensesFromRecurring');
   final _uuid = const Uuid();
 
   GenerateExpensesFromRecurring({
     required this.recurringRepository,
-    required this.expenseRepository,
+    required this.addExpenseWithAccountUpdate,
   });
 
   /// Retorna el número de gastos generados
@@ -47,9 +48,9 @@ class GenerateExpensesFromRecurring implements UseCase<int, NoParams> {
       // 2. Para cada gasto recurrente, generar el gasto real
       for (final recurring in dueRecurringExpenses) {
         try {
-          // Crear el gasto real
+          // Crear el gasto real y actualizar la cuenta
           final expense = _createExpenseFromRecurring(recurring);
-          await expenseRepository.addExpense(expense);
+          await addExpenseWithAccountUpdate(expense);
 
           // Actualizar la fecha de última generación
           final updatedRecurring = recurring.copyWith(

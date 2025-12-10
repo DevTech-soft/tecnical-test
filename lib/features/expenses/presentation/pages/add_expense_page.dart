@@ -225,12 +225,28 @@ class _AddExpensePageState extends State<AddExpensePage> {
                 label: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(_selectedCategory?.icon ?? Icons.layers_outlined),
+                    Icon(
+                      _selectedCategory?.icon ?? Icons.layers_outlined,
+                      color:
+                          _selectedCategory?.color ??
+                          AppColors.textPrimaryLight,
+                    ),
                     const SizedBox(width: 4),
-                    Text(_selectedCategory?.name ?? 'Selecciona una categoría'),
+                    Text(
+                      _selectedCategory?.name ?? 'Selecciona una categoría',
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
+                      ),
+                    ),
                   ],
                 ),
                 selected: _selectedCategory != null,
+                selectedColor:
+                    _selectedCategory?.color.withValues(alpha: 0.5) ??
+                    AppColors.textPrimaryLight,
+                side: BorderSide(
+                  color: _selectedCategory?.color ?? AppColors.grey300,
+                ),
                 onSelected: (value) {
                   showModalBottomSheet(
                     context: context,
@@ -424,8 +440,6 @@ class _AddExpensePageState extends State<AddExpensePage> {
       ),
     );
   }
-
-  void _showCategorySelector() {}
 }
 
 // Extension to scale gradient opacity

@@ -1,3 +1,4 @@
+import 'package:dayli_expenses/core/utils/date_formatter.dart';
 import 'package:dayli_expenses/features/expenses/domain/entities/category.dart';
 import 'package:dayli_expenses/features/expenses/presentation/widgets/expense_info_card.dart';
 import 'package:flutter/material.dart';
@@ -67,25 +68,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void _navigateToAddExpense() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder:
-            (_) => MultiBlocProvider(
-              providers: [
-                BlocProvider.value(value: _expensesBloc),
-                BlocProvider.value(value: context.read<CategoryBloc>()),
-                BlocProvider.value(value: context.read<AccountBloc>()),
-              ],
-              child: const AddExpensePage(),
-            ),
-      ),
-    ).then((_) {
-      // Reload expenses after adding
-      _expensesBloc.add(LoadExpensesEvent());
-    });
-  }
+
 
   void _navigateToEditExpense(Expense expense) {
     Navigator.push(
@@ -186,23 +169,35 @@ class _HomePageState extends State<HomePage> {
                                   final accounts = accountState.accounts;
 
                                   return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       ExpenseSummaryCard(accounts: accounts),
-                                      AppSpacing.verticalSpaceSM,
-                                      BlocBuilder<ExpensesBloc, ExpensesState>(
-                                        builder: (context, expenseState) {
-                                          if (expenseState is ExpensesLoaded) {
-                                            final filteredExpenses =
-                                                _filterExpensesByDate(
-                                                  expenseState.expenses,
-                                                );
-                                            return StatsOverview(
-                                              expenses: filteredExpenses,
-                                            );
-                                          }
-                                          return const SizedBox.shrink();
-                                        },
+                                      AppSpacing.verticalSpaceXL,
+                                      Text(
+                                        'Este mes',
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.textPrimaryLight,
+                                        ),
                                       ),
+                                      AppSpacing.verticalSpaceMD,
+                                      // BlocBuilder<ExpensesBloc, ExpensesState>(
+                                      //   builder: (context, expenseState) {
+                                      //     if (expenseState is ExpensesLoaded) {
+                                      //       final filteredExpenses =
+                                      //           _filterExpensesByDate(
+                                      //             expenseState.expenses,
+                                      //           );
+                                      //       return StatsOverview(
+                                      //         expenses: filteredExpenses,
+                                      //       );
+                                      //     }
+                                      //     return const SizedBox.shrink();
+                                      //   },
+                                      // ),
                                       BlocBuilder<ExpensesBloc, ExpensesState>(
                                         builder: (context, state) {
                                           if (state is ExpensesLoaded) {
@@ -247,53 +242,93 @@ class _HomePageState extends State<HomePage> {
                                                           ),
                                                         ),
                                                       )
-                                                      : Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceAround,
-                                                        children:
-                                                            recentExpenses.map((
-                                                              expense,
-                                                            ) {
-                                                              final category =
-                                                                  CategoryHelper.getCategoryById(
-                                                                    expense
-                                                                        .categoryId,
-                                                                  );
-                                                              return Expanded(
-                                                                child: Row(
-                                                                  children: [
-                                                                    Container(
-                                                                      width: 8,
-                                                                      height: 8,
-                                                                      decoration: BoxDecoration(
-                                                                        color:
-                                                                            category.color,
-                                                                        shape:
-                                                                            BoxShape.circle,
+                                                      : Padding(
+                                                        padding:
+                                                            const EdgeInsets.symmetric(
+                                                              horizontal:
+                                                                  AppSpacing.md,
+                                                            ),
+                                                        child: Row(
+                                                          children:
+                                                              recentExpenses.map((
+                                                                expense,
+                                                              ) {
+                                                                final category =
+                                                                    CategoryHelper.getCategoryById(
+                                                                      expense
+                                                                          .categoryId,
+                                                                    );
+
+                                                                return Padding(
+                                                                  padding:
+                                                                      const EdgeInsets.only(
+                                                                        right:
+                                                                            32,
                                                                       ),
-                                                                    ),
-                                                                    const SizedBox(
-                                                                      width: 8,
-                                                                    ),
-                                                                    Expanded(
-                                                                      child: Text(
-                                                                        expense.note ??
+                                                                  child: Row(
+                                                                    crossAxisAlignment:
+                                                                        CrossAxisAlignment
+                                                                            .start,
+                                                                    children: [
+                                                                      Container(
+                                                                        width:
+                                                                            10,
+                                                                        height:
+                                                                            10,
+                                                                        margin: const EdgeInsets.only(
+                                                                          top:
+                                                                              4,
+                                                                        ),
+                                                                        decoration: BoxDecoration(
+                                                                          color:
+                                                                              category.color,
+                                                                          shape:
+                                                                              BoxShape.circle,
+                                                                        ),
+                                                                      ),
+
+                                                                      const SizedBox(
+                                                                        width:
+                                                                            8,
+                                                                      ),
+
+                                                                      Column(
+                                                                        crossAxisAlignment:
+                                                                            CrossAxisAlignment.start,
+                                                                        children: [
+                                                                          Text(
                                                                             category.name,
-                                                                        style:
-                                                                            Theme.of(
+                                                                            style: Theme.of(
                                                                               context,
-                                                                            ).textTheme.bodySmall,
-                                                                        maxLines:
-                                                                            1,
-                                                                        overflow:
-                                                                            TextOverflow.ellipsis,
+                                                                            ).textTheme.bodyMedium?.copyWith(
+                                                                              fontWeight:
+                                                                                  FontWeight.bold,
+                                                                              color:
+                                                                                  AppColors.textPrimaryLight,
+                                                                            ),
+                                                                          ),
+                                                                          const SizedBox(
+                                                                            height:
+                                                                                4,
+                                                                          ),
+                                                                          Text(
+                                                                            DateFormatter.formatCurrency(
+                                                                              expense.amount,
+                                                                            ),
+                                                                            style: Theme.of(
+                                                                              context,
+                                                                            ).textTheme.bodyMedium?.copyWith(
+                                                                              fontWeight:
+                                                                                  FontWeight.normal,
+                                                                            ),
+                                                                          ),
+                                                                        ],
                                                                       ),
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              );
-                                                            }).toList(),
+                                                                    ],
+                                                                  ),
+                                                                );
+                                                              }).toList(),
+                                                        ),
                                                       ),
                                             );
                                           }
@@ -320,7 +355,7 @@ class _HomePageState extends State<HomePage> {
                   );
                 },
               ),
-              floatingActionButton: _buildFAB(context),
+              // floatingActionButton: _buildFAB(context),
             ),
           ),
         );
@@ -374,25 +409,7 @@ class _HomePageState extends State<HomePage> {
                     : AppColors.textPrimaryLight,
           ),
           onSelected: (value) {
-            if (value == 'recurring') {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const RecurringExpensesPage(),
-                ),
-              );
-            } else if (value == 'categories') {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder:
-                      (_) => BlocProvider.value(
-                        value: context.read<CategoryBloc>(),
-                        child: const ManageCategoriesPage(),
-                      ),
-                ),
-              );
-            } else if (value == 'export') {
+            if (value == 'export') {
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -434,26 +451,7 @@ class _HomePageState extends State<HomePage> {
           },
           itemBuilder:
               (context) => [
-                const PopupMenuItem(
-                  value: 'recurring',
-                  child: Row(
-                    children: [
-                      Icon(Icons.repeat, size: 20),
-                      SizedBox(width: 12),
-                      Text('Gastos Recurrentes'),
-                    ],
-                  ),
-                ),
-                const PopupMenuItem(
-                  value: 'categories',
-                  child: Row(
-                    children: [
-                      Icon(Icons.category, size: 20),
-                      SizedBox(width: 12),
-                      Text('Gestionar Categorías'),
-                    ],
-                  ),
-                ),
+                
                 const PopupMenuItem(
                   value: 'export',
                   child: Row(
@@ -508,26 +506,8 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  String _getGreeting() {
-    final hour = DateTime.now().hour;
-    if (hour < 12) {
-      return 'Buenos días';
-    } else if (hour < 18) {
-      return 'Buenas tardes';
-    } else {
-      return 'Buenas noches';
-    }
-  }
+ 
 
-  Widget _buildFAB(BuildContext context) {
-    return FloatingActionButton.extended(
-      heroTag: 'home_fab',
-      onPressed: _navigateToAddExpense,
-      icon: const Icon(Icons.add),
-      label: Text(_isScrolled ? '' : 'Agregar Gasto'),
-      elevation: AppSpacing.elevation3,
-    );
-  }
 
   Widget _buildLoadingState() {
     return Column(

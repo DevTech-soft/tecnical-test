@@ -62,6 +62,12 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   }
 
   @override
+  Future<Expense?> getExpenseById(String id) async {
+    final model = await local.getExpenseById(id);
+    return model?.toEntity();
+  }
+
+  @override
   Future<void> deleteExpense(String id) async {
     // Eliminar localmente
     await local.deleteExpense(id);

@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:dayli_expenses/features/expenses/presentation/pages/manage_categories_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/category.dart';
@@ -33,6 +36,7 @@ class CategoryChip extends StatelessWidget {
           fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
         ),
       ),
+      onTap: onTap,
     );
   }
 }
@@ -40,11 +44,13 @@ class CategoryChip extends StatelessWidget {
 class CategorySelector extends StatelessWidget {
   final ExpenseCategory? selectedCategory;
   final ValueChanged<ExpenseCategory>? onCategorySelected;
+  final ScrollController? scrollController;
 
   const CategorySelector({
     super.key,
     this.selectedCategory,
     this.onCategorySelected,
+    this.scrollController,
   });
 
   @override
@@ -76,42 +82,65 @@ class CategorySelector extends StatelessWidget {
         }
 
         return Container(
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: AppSpacing.paddingXL,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Categoría', style: Theme.of(context).textTheme.titleMedium),
-              AppSpacing.verticalSpaceSM,
-              SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: Column(
-                  children:
-                      categories.map((category) {
-                        final isSelected = selectedCategory?.id == category.id;
-                        return Padding(
-                          padding: const EdgeInsets.only(right: AppSpacing.sm),
-                          child: CategoryChip(
-                            category: category,
-                            isSelected: isSelected,
-                            onTap: () {
-                              if (onCategorySelected != null) {
-                                onCategorySelected!(category);
-                              }
-                            },
-                          ),
-                        );
-                      }).toList(),
+              Divider(),
+              AppSpacing.verticalSpaceXS,
+
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children:
+                        categories.map((category) {
+                          final isSelected =
+                              selectedCategory?.id == category.id;
+                          return Padding(
+                            padding: const EdgeInsets.only(
+                              right: AppSpacing.sm,
+                            ),
+                            child: CategoryChip(
+                              category: category,
+                              isSelected: isSelected,
+                              onTap: () {
+                                log('Categoría seleccionada: ${category.name}');
+                                onCategorySelected?.call(category);
+                              },
+                            ),
+                          );
+                        }).toList(),
+                  ),
                 ),
               ),
+
               AppSpacing.verticalSpaceSM,
-              Container(
-                child: TextButton.icon(
+
+              SizedBox(
+                child: ElevatedButton.icon(
                   onPressed: () {
-                    // Navegar a la página de gestión de categorías
-                    Navigator.pushNamed(context, '/manage_categories');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (_) => BlocProvider.value(
+                              value: context.read<CategoryBloc>(),
+                              child: const ManageCategoriesPage(),
+                            ),
+                      ),
+                    );
                   },
-                  icon: const Icon(Icons.edit),
-                  label: const Text('Gestionar Categorías'),
+                  icon: const Icon(Icons.add),
+                  label: const Text('Nueva Categoría'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.sm,
+                    ),
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.5),
+                  ),
                 ),
               ),
             ],
@@ -119,5 +148,5 @@ class CategorySelector extends StatelessWidget {
         );
       },
     );
-  }
+  }  
 }

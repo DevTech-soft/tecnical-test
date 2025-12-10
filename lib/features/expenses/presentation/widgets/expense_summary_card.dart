@@ -43,7 +43,7 @@ class ExpenseSummaryCard extends StatelessWidget {
                 Text(
                   'Balance Actual',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
                 AppSpacing.verticalSpaceSM,
@@ -56,7 +56,10 @@ class ExpenseSummaryCard extends StatelessWidget {
                   ),
                 ),
                 AppSpacing.verticalSpaceLG,
-                Container(height: 1, color: Colors.white.withOpacity(0.2)),
+                Container(
+                  height: 1,
+                  color: Colors.white.withValues(alpha: 0.2),
+                ),
                 AppSpacing.verticalSpaceMD,
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -65,7 +68,7 @@ class ExpenseSummaryCard extends StatelessWidget {
                     Container(
                       width: 1,
                       height: 40,
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                     ),
                     _buildStatItem(
                       context,
@@ -91,7 +94,7 @@ class ExpenseSummaryCard extends StatelessWidget {
           Text(
             label,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
                 ),
           ),
           AppSpacing.verticalSpaceXS,

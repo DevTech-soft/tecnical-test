@@ -15,6 +15,7 @@ import 'features/expenses/data/models/category_model.dart';
 import 'features/budget/data/models/budget_model.dart';
 import 'features/accounts/data/models/account_model.dart';
 import 'core/theme/app_theme.dart';
+import 'core/routes/app_routes.dart';
 import 'features/expenses/presentation/blocs/category_bloc.dart';
 import 'features/expenses/presentation/blocs/category_event.dart';
 
@@ -80,6 +81,7 @@ class MyApp extends StatelessWidget {
             darkTheme: AppTheme.darkTheme,
             themeMode: ThemeMode.system,
             home: const AuthWrapper(),
+            onGenerateRoute: AppRoutes.onGenerateRoute,
           );
         },
       ),

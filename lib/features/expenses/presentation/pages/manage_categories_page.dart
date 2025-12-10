@@ -15,6 +15,27 @@ class ManageCategoriesPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Gestionar Categorías'),
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add, color: Colors.black),
+            onPressed: () async {
+              final result = await Navigator.push<bool>(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (_) => BlocProvider.value(
+                        value: context.read<CategoryBloc>(),
+                        child: const AddCategoryPage(),
+                      ),
+                ),
+              );
+
+              if (result == true && context.mounted) {
+                context.read<CategoryBloc>().add(const LoadCategories());
+              }
+            },
+          ),
+        ],
       ),
       body: BlocConsumer<CategoryBloc, CategoryState>(
         listener: (context, state) {
@@ -38,9 +59,7 @@ class ManageCategoriesPage extends StatelessWidget {
         },
         builder: (context, state) {
           if (state is CategoryLoading) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (state is CategoryError) {
@@ -48,11 +67,7 @@ class ManageCategoriesPage extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: Colors.red,
-                  ),
+                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
                   const SizedBox(height: 16),
                   Text(
                     'Error',
@@ -114,7 +129,8 @@ class ManageCategoriesPage extends StatelessWidget {
           final customCategories = <ExpenseCategory>[];
 
           // Necesitamos verificar si es personalizada comparando con las predefinidas
-          final predefinedIds = CategoryHelper.defaultCategories.map((c) => c.id).toSet();
+          final predefinedIds =
+              CategoryHelper.defaultCategories.map((c) => c.id).toSet();
 
           for (final category in categories) {
             if (predefinedIds.contains(category.id)) {
@@ -131,15 +147,13 @@ class ManageCategoriesPage extends StatelessWidget {
                 Text(
                   'Categorías Predefinidas',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 12),
-                ...predefinedCategories.map((category) =>
-                  _CategoryTile(
-                    category: category,
-                    isPredefined: true,
-                  ),
+                ...predefinedCategories.map(
+                  (category) =>
+                      _CategoryTile(category: category, isPredefined: true),
                 ),
                 const SizedBox(height: 24),
               ],
@@ -149,15 +163,15 @@ class ManageCategoriesPage extends StatelessWidget {
                   Text(
                     'Categorías Personalizadas',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   Text(
                     '${customCategories.length}',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
@@ -176,51 +190,27 @@ class ManageCategoriesPage extends StatelessWidget {
                         const SizedBox(height: 12),
                         Text(
                           'Sin categorías personalizadas',
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                color: Colors.grey[600],
-                              ),
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(color: Colors.grey[600]),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           'Toca el botón + para crear una',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.grey[500],
-                              ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: Colors.grey[500]),
                         ),
                       ],
                     ),
                   ),
                 )
               else
-                ...customCategories.map((category) =>
-                  _CategoryTile(
-                    category: category,
-                    isPredefined: false,
-                  ),
+                ...customCategories.map(
+                  (category) =>
+                      _CategoryTile(category: category, isPredefined: false),
                 ),
             ],
           );
         },
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'manage_categories_fab',
-        onPressed: () async {
-          final result = await Navigator.push<bool>(
-            context,
-            MaterialPageRoute(
-              builder: (_) => BlocProvider.value(
-                value: context.read<CategoryBloc>(),
-                child: const AddCategoryPage(),
-              ),
-            ),
-          );
-
-          if (result == true && context.mounted) {
-            context.read<CategoryBloc>().add(const LoadCategories());
-          }
-        },
-        icon: const Icon(Icons.add),
-        label: const Text('Nueva Categoría'),
       ),
     );
   }
@@ -230,10 +220,7 @@ class _CategoryTile extends StatelessWidget {
   final ExpenseCategory category;
   final bool isPredefined;
 
-  const _CategoryTile({
-    required this.category,
-    required this.isPredefined,
-  });
+  const _CategoryTile({required this.category, required this.isPredefined});
 
   @override
   Widget build(BuildContext context) {
@@ -247,10 +234,7 @@ class _CategoryTile extends StatelessWidget {
             color: category.color.withOpacity(0.15),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(
-            category.icon,
-            color: category.color,
-          ),
+          child: Icon(category.icon, color: category.color),
         ),
         title: Text(
           category.name,
@@ -260,57 +244,68 @@ class _CategoryTile extends StatelessWidget {
           isPredefined ? 'Predefinida' : 'Personalizada',
           style: TextStyle(
             fontSize: 12,
-            color: isPredefined ? Colors.grey : Theme.of(context).colorScheme.primary,
+            color:
+                isPredefined
+                    ? Colors.grey
+                    : Theme.of(context).colorScheme.primary,
           ),
         ),
-        trailing: isPredefined
-            ? null
-            : PopupMenuButton<String>(
-                icon: const Icon(Icons.more_vert),
-                onSelected: (value) {
-                  if (value == 'edit') {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => BlocProvider.value(
-                          value: context.read<CategoryBloc>(),
-                          child: AddCategoryPage(
-                            categoryToEdit: category,
+        trailing:
+            isPredefined
+                ? null
+                : PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert),
+                  onSelected: (value) {
+                    if (value == 'edit') {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (_) => BlocProvider.value(
+                                value: context.read<CategoryBloc>(),
+                                child: AddCategoryPage(
+                                  categoryToEdit: category,
+                                ),
+                              ),
+                        ),
+                      ).then((result) {
+                        if (result == true && context.mounted) {
+                          context.read<CategoryBloc>().add(
+                            const LoadCategories(),
+                          );
+                        }
+                      });
+                    } else if (value == 'delete') {
+                      _showDeleteDialog(context);
+                    }
+                  },
+                  itemBuilder:
+                      (context) => [
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit, size: 20),
+                              SizedBox(width: 12),
+                              Text('Editar'),
+                            ],
                           ),
                         ),
-                      ),
-                    ).then((result) {
-                      if (result == true && context.mounted) {
-                        context.read<CategoryBloc>().add(const LoadCategories());
-                      }
-                    });
-                  } else if (value == 'delete') {
-                    _showDeleteDialog(context);
-                  }
-                },
-                itemBuilder: (context) => [
-                  const PopupMenuItem(
-                    value: 'edit',
-                    child: Row(
-                      children: [
-                        Icon(Icons.edit, size: 20),
-                        SizedBox(width: 12),
-                        Text('Editar'),
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete, size: 20, color: Colors.red),
+                              SizedBox(width: 12),
+                              Text(
+                                'Eliminar',
+                                style: TextStyle(color: Colors.red),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: 'delete',
-                    child: Row(
-                      children: [
-                        Icon(Icons.delete, size: 20, color: Colors.red),
-                        SizedBox(width: 12),
-                        Text('Eliminar', style: TextStyle(color: Colors.red)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                ),
       ),
     );
   }
@@ -318,32 +313,31 @@ class _CategoryTile extends StatelessWidget {
   void _showDeleteDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Eliminar Categoría'),
-        content: Text(
-          '¿Estás seguro de eliminar "${category.name}"?\n\n'
-          'Los gastos asociados a esta categoría no se eliminarán, '
-          'pero quedarán sin categoría válida.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              context.read<CategoryBloc>().add(
-                DeleteCategoryEvent(category.id),
-              );
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
+      builder:
+          (dialogContext) => AlertDialog(
+            title: const Text('Eliminar Categoría'),
+            content: Text(
+              '¿Estás seguro de eliminar "${category.name}"?\n\n'
+              'Los gastos asociados a esta categoría no se eliminarán, '
+              'pero quedarán sin categoría válida.',
             ),
-            child: const Text('Eliminar'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text('Cancelar'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(dialogContext);
+                  context.read<CategoryBloc>().add(
+                    DeleteCategoryEvent(category.id),
+                  );
+                },
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                child: const Text('Eliminar'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 }

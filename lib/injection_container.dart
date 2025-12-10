@@ -29,6 +29,10 @@ import 'features/expenses/domain/usecases/add_expense.dart';
 import 'features/expenses/domain/usecases/delete_expense.dart';
 import 'features/expenses/domain/usecases/update_expense.dart';
 import 'features/expenses/domain/usecases/search_expenses.dart';
+import 'features/expenses/domain/usecases/get_expense_by_id.dart';
+import 'features/expenses/domain/usecases/add_expense_with_account_update.dart';
+import 'features/expenses/domain/usecases/update_expense_with_account_update.dart';
+import 'features/expenses/domain/usecases/delete_expense_with_account_update.dart';
 import 'features/expenses/domain/usecases/create_recurring_expense.dart';
 import 'features/expenses/domain/usecases/get_all_recurring_expenses.dart';
 import 'features/expenses/domain/usecases/update_recurring_expense.dart';
@@ -164,6 +168,26 @@ sl.registerLazySingleton(() => AddExpense(sl()));
 sl.registerLazySingleton(() => DeleteExpense(sl()));
 sl.registerLazySingleton(() => UpdateExpense(sl()));
 sl.registerLazySingleton(() => SearchExpenses(sl()));
+sl.registerLazySingleton(() => GetExpenseById(sl()));
+
+// usecases - Expenses with Account Update
+sl.registerLazySingleton(() => AddExpenseWithAccountUpdate(
+  expenseRepository: sl(),
+  getAccountById: sl(),
+  updateAccount: sl(),
+));
+sl.registerLazySingleton(() => UpdateExpenseWithAccountUpdate(
+  expenseRepository: sl(),
+  getExpenseById: sl(),
+  getAccountById: sl(),
+  updateAccount: sl(),
+));
+sl.registerLazySingleton(() => DeleteExpenseWithAccountUpdate(
+  expenseRepository: sl(),
+  getExpenseById: sl(),
+  getAccountById: sl(),
+  updateAccount: sl(),
+));
 
 // usecases - Budget
 sl.registerLazySingleton(() => CreateBudget(sl()));
@@ -179,7 +203,7 @@ sl.registerLazySingleton(() => UpdateRecurringExpense(sl()));
 sl.registerLazySingleton(() => DeleteRecurringExpense(sl()));
 sl.registerLazySingleton(() => GenerateExpensesFromRecurring(
   recurringRepository: sl(),
-  expenseRepository: sl(),
+  addExpenseWithAccountUpdate: sl(),
 ));
 
 // usecases - Categories
@@ -199,7 +223,12 @@ sl.registerLazySingleton(() => WatchAccounts(sl()));
 
 
 // blocs - Expenses
-sl.registerFactory(() => ExpensesBloc(getAll: sl(), addExpense: sl(), deleteExpense: sl(), updateExpense: sl()));
+sl.registerFactory(() => ExpensesBloc(
+  getAll: sl(),
+  addExpense: sl<AddExpenseWithAccountUpdate>(),
+  deleteExpense: sl<DeleteExpenseWithAccountUpdate>(),
+  updateExpense: sl<UpdateExpenseWithAccountUpdate>(),
+));
 sl.registerFactory(() => FilterBloc(searchExpenses: sl()));
 sl.registerFactory(() => RecurringExpensesBloc(
   getAllRecurringExpenses: sl(),

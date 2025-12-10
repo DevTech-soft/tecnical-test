@@ -4,18 +4,18 @@ import '../../../../core/errors/error_handler.dart';
 import '../../../../core/errors/failures.dart';
 import '../../domain/entities/expense.dart';
 import '../../domain/usecases/get_all_expenses.dart';
-import '../../domain/usecases/add_expense.dart';
-import '../../domain/usecases/delete_expense.dart';
-import '../../domain/usecases/update_expense.dart';
+import '../../domain/usecases/add_expense_with_account_update.dart';
+import '../../domain/usecases/delete_expense_with_account_update.dart';
+import '../../domain/usecases/update_expense_with_account_update.dart';
 
 part 'expenses_event.dart';
 part 'expenses_state.dart';
 
 class ExpensesBloc extends Bloc<ExpensesEvent, ExpensesState> {
   final GetAllExpenses getAll;
-  final AddExpense addExpense;
-  final DeleteExpense deleteExpense;
-  final UpdateExpense updateExpense;
+  final AddExpenseWithAccountUpdate addExpense;
+  final DeleteExpenseWithAccountUpdate deleteExpense;
+  final UpdateExpenseWithAccountUpdate updateExpense;
 
   ExpensesBloc({
     required this.getAll,

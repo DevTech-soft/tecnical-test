@@ -1,3 +1,4 @@
+import 'package:dayli_expenses/core/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../expenses/presentation/pages/home_page.dart';
@@ -5,11 +6,13 @@ import '../budget/presentation/pages/budget_page.dart';
 import '../analytics/presentation/pages/analytics_page.dart';
 import '../accounts/presentation/pages/accounts_page.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/routes/app_routes.dart';
 import '../../core/usecases/usecase.dart';
 import '../../injection_container.dart';
 import '../expenses/domain/usecases/generate_expenses_from_recurring.dart';
 import '../expenses/presentation/blocs/category_bloc.dart';
 import '../expenses/presentation/blocs/category_event.dart';
+import '../expenses/presentation/blocs/expenses_bloc.dart';
 import '../accounts/presentation/bloc/account_bloc.dart';
 import '../accounts/presentation/bloc/account_event.dart';
 import '../../core/utils/app_logger.dart';
@@ -21,6 +24,9 @@ class MainNavigationPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider(
+          create: (context) => sl<ExpensesBloc>(),
+        ),
         BlocProvider(
           create: (context) => sl<CategoryBloc>()..add(const LoadCategories()),
         ),
@@ -169,6 +175,56 @@ class _MainNavigationPageState extends State<_MainNavigationPageContent> {
           ],
         ),
       ),
+      floatingActionButton: _buildFAB(context),
+    );
+  }
+
+  Widget _buildFAB(BuildContext context) {
+    return FloatingActionButton(
+      heroTag: 'home_fab',
+      onPressed: () {
+        showAddExpensesType(context);
+      },
+      elevation: AppSpacing.elevation3,
+      child: const Icon(Icons.add),
+    );
+  }
+
+  void showAddExpensesType(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext modalContext) {
+        return Container(
+          height: 200,
+          child: Column(
+            children: [
+              SizedBox(height: 10),
+              Text(
+                'Registrar Evento',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 10),
+              Divider(),
+              ListTile(
+                leading: Icon(Icons.fact_check),
+                title: Text('Gasto'),
+                onTap: () {
+                  Navigator.pop(modalContext);
+                  AppRoutes.navigateAndReload(context, AppRoutes.addExpense);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.repeat),
+                title: Text('Gasto Recurrente'),
+                onTap: () {
+                  Navigator.pop(modalContext);
+                  AppRoutes.navigateAndReload(context, AppRoutes.addRecurringExpense);
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

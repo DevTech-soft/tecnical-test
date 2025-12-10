@@ -4,6 +4,7 @@ import '../models/expense_model.dart';
 abstract class ExpenseLocalDataSource {
   Future<void> addExpense(ExpenseModel expense);
   Future<List<ExpenseModel>> getAllExpenses();
+  Future<ExpenseModel?> getExpenseById(String id);
   Future<void> deleteExpense(String id);
   Future<void> updateExpense(ExpenseModel expense);
 }
@@ -21,6 +22,11 @@ class ExpenseLocalDataSourceImpl implements ExpenseLocalDataSource {
   @override
   Future<List<ExpenseModel>> getAllExpenses() async {
     return box.values.toList();
+  }
+
+  @override
+  Future<ExpenseModel?> getExpenseById(String id) async {
+    return box.get(id);
   }
 
   @override
